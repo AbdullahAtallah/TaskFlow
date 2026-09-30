@@ -1,0 +1,1 @@
+// this is for all shared functions that are used across the project
