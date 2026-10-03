@@ -2,24 +2,56 @@ import { Box, Button, Link, Typography, Stack } from "@mui/material";
 
 import EmailField from "../../molecules/EmailField/EmailField";
 import PasswordField from "../../molecules/PasswordField/PasswordField";
-import RememberMe from "../../molecules/RememberMe/RememberMe";
+import TextField from "../../molecules/TextField/TextField";
+import AcceptTerms from "../../molecules/AcceptTerms/AcceptTerms";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
 import { useState } from "react";
 
-const SignInForm = () => {
+const CreateAccountForm = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleSubmit = (event) => {
     event.preventDefault();
   };
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <AuthTitle>Sign in</AuthTitle>
-      <AuthDescription>Sign in with your work e-mail address.</AuthDescription>
+      <AuthTitle>Create account</AuthTitle>
+      <AuthDescription>
+        New accounts get the User role. An administrator adds you to a team.
+      </AuthDescription>
       <Stack spacing={1.5}>
+        <Box>
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Typography
+                component="label"
+                sx={{
+                  fontSize: "14px",
+                  color: "#5a5c65",
+                  fontWeight: 500,
+                }}
+              >
+                Full name
+              </Typography>
+            </Box>
+            <TextField
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </Box>
+        </Box>
+
         <Box>
           <Box>
             <Box
@@ -63,18 +95,30 @@ const SignInForm = () => {
             >
               Password
             </Typography>
-            <Link
-              href="#"
-              underline="hover"
-              sx={{
-                fontSize: "14px",
-                cursor: "pointer",
-                color: "#365aff",
-                fontWeight: 500,
-              }}
+          </Box>
+          <PasswordField
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <Typography sx={{ color: "#9a8f8f", fontSize: 14, mt: 1 }}>
+            At least 8 characters, including a number
+          </Typography>
+        </Box>
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Typography
+              component="label"
+              sx={{ fontSize: "14px", color: "#5a5c65", fontWeight: 500 }}
             >
-              Forgot password?
-            </Link>
+              Repeat password
+            </Typography>
           </Box>
           <PasswordField
             value={password}
@@ -82,9 +126,9 @@ const SignInForm = () => {
           />
         </Box>
         <Box>
-          <RememberMe
-            checked={rememberMe}
-            onChange={(event) => setRememberMe(event.target.checked)}
+          <AcceptTerms
+            checked={acceptTerms}
+            onChange={(event) => setAcceptTerms(event.target.checked)}
           />
         </Box>
 
@@ -111,13 +155,13 @@ const SignInForm = () => {
               backgroundColor: "#365aff",
             }}
           >
-            Sign in
+            Create account
           </Button>
 
           <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
-            No account yet?{" "}
+            Have an account?{" "}
             <Link
-              href="/create-account"
+              href="/sign-in"
               underline="hover"
               sx={{
                 fontSize: "14px",
@@ -126,7 +170,7 @@ const SignInForm = () => {
                 fontWeight: 500,
               }}
             >
-              Create account
+              Sign in
             </Link>
           </Typography>
         </Box>
@@ -135,4 +179,4 @@ const SignInForm = () => {
   );
 };
 
-export default SignInForm;
+export default CreateAccountForm;

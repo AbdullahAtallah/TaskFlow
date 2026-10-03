@@ -3,8 +3,8 @@ const EmailField = ({ value, onChange }) => {
   return (
     <TextField
       fullWidth
-      placeholder="name@example.com"
-      type="email"
+      placeholder="e.g. Laura Bakker"
+      type="text"
       value={value}
       onChange={onChange}
       sx={{

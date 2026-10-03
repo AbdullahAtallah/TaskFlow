@@ -1,9 +1,9 @@
-import SignInPage from "./pages/SignInPage/SignInPage";
+import Routers from "./Routers";
 
 function App() {
   return (
     <>
-      <SignInPage />
+      <Routers />
     </>
   );
 }
