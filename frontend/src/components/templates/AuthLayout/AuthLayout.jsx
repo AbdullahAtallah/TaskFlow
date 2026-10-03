@@ -10,8 +10,10 @@ const AuthLayout = ({ children }) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-
+        p: "50px",
         backgroundColor: "#F8F8FA",
+        boxSizing: "border-box",
+        justifyContent: "center",
       }}
     >
       <Box sx={{ mb: 3 }}>

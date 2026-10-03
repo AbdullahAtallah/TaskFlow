@@ -19,27 +19,33 @@ const SignInForm = () => {
     <Box component="form" onSubmit={handleSubmit}>
       <AuthTitle>Sign in</AuthTitle>
       <AuthDescription>Sign in with your work e-mail address.</AuthDescription>
-      <Stack spacing={2.5}>
+      <Stack spacing={1.5}>
         <Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-            }}
-          >
-            <Typography
-              component="label"
-              sx={{ fontSize: "14px", color: "#5a5c65", fontWeight: 500 }}
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
             >
-              E-mail
-            </Typography>
+              <Typography
+                component="label"
+                sx={{
+                  fontSize: "14px",
+                  color: "#5a5c65",
+                  fontWeight: 500,
+                }}
+              >
+                E-mail
+              </Typography>
+            </Box>
+            <EmailField
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
           </Box>
-          <EmailField
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
         </Box>
 
         <Box>
@@ -60,7 +66,12 @@ const SignInForm = () => {
             <Link
               href="#"
               underline="hover"
-              sx={{ fontSize: "14px", cursor: "pointer", color: "#365aff" }}
+              sx={{
+                fontSize: "14px",
+                cursor: "pointer",
+                color: "#365aff",
+                fontWeight: 500,
+              }}
             >
               Forgot password?
             </Link>
@@ -81,6 +92,7 @@ const SignInForm = () => {
           sx={{
             display: "flex",
             textAlign: "center",
+            alignItems: "center",
             justifyContent: "space-between",
             gap: "16px",
             flexWrap: "wrap",
@@ -92,8 +104,9 @@ const SignInForm = () => {
             sx={{
               textTransform: "none",
               fontSize: "14",
-              fontWeight: 400,
+              fontWeight: 500,
               height: "38px",
+              p: "0px 12px",
               borderRadius: "6px",
               backgroundColor: "#365aff",
             }}
@@ -101,12 +114,17 @@ const SignInForm = () => {
             Sign in
           </Button>
 
-          <Typography sx={{ fontSize: "14px" }}>
-            No account yet?
+          <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
+            No account yet?{" "}
             <Link
               href="#"
               underline="hover"
-              sx={{ fontSize: "14px", cursor: "pointer", color: "#304FFE" }}
+              sx={{
+                fontSize: "14px",
+                cursor: "pointer",
+                color: "#304FFE",
+                fontWeight: 500,
+              }}
             >
               Create account
             </Link>

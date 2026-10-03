@@ -12,8 +12,8 @@ const AuthFooter = () => {
     >
       <Typography
         sx={{
-          color: "#64748B",
-          fontSize: "14px",
+          color: "#6b7280",
+          fontSize: "12px",
         }}
       >
         © 2026 TaskFlow
@@ -21,8 +21,8 @@ const AuthFooter = () => {
 
       <Typography
         sx={{
-          color: "#64748B",
-          fontSize: "14px",
+          color: "#6b7280",
+          fontSize: "12px",
         }}
       >
         Secured by Auth0
