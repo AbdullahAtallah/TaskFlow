@@ -4,7 +4,7 @@ const AppLogo = () => {
     <Typography
       variant="h5"
       component="div"
-      sx={{ fontWeight: 600, color: "#0f1d63", fontSize: "20px" }}
+      sx={{ fontWeight: 700, color: "#0f1d63", fontSize: "17px" }}
     >
       TaskFlow
     </Typography>
