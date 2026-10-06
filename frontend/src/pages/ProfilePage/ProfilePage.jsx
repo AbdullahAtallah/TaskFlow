@@ -5,7 +5,10 @@ import PageBody from "../../components/atoms/PageBody/PageBody";
 const DashboardPage = () => {
   return (
     <>
-      <PageHeader title="Roles" subtitle="Permissions come only from roles" />
+      <PageHeader
+        title="Profile"
+        subtitle="Your account, teams and permissions"
+      />
       <PageBody></PageBody>
     </>
   );
