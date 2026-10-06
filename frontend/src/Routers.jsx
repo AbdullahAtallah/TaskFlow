@@ -5,6 +5,8 @@ import AppLayout from "./components/templates/AppLayout/AppLayout";
 import DashboardPage from "./pages/DashboardPage/DashboardPage";
 import TeamPage from "./pages/TeamsPage/TeamsPage";
 import ProjectsPage from "./pages/ProjectsPage/ProjectsPage";
+import UsersPage from "./pages/UsersPage/UsersPage";
+import RolesPage from "./pages/RolesPage/RolesPage";
 
 const Routers = () => {
   return (
@@ -17,6 +19,8 @@ const Routers = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/teams" element={<TeamPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/management/users" element={<UsersPage />} />
+        <Route path="/management/roles" element={<RolesPage />} />
       </Route>
     </Routes>
   );

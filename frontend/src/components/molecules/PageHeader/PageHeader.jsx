@@ -10,8 +10,7 @@ const PageHeader = ({ title, subtitle, actions }) => {
         alignItems: "center",
         justifyContent: "space-between",
         gap: "16px",
-        px: "36px",
-        py: "28px",
+        p: "24px 32px",
         backgroundColor: "#f8f8fa",
         borderBottom: "1px solid #e5e7eb",
       }}

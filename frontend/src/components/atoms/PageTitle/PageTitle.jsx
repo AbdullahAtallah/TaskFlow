@@ -4,7 +4,13 @@ const PageTitle = ({ children }) => {
   return (
     <Typography
       component="h1"
-      sx={{ fontSize: "24px", fontWeight: 700, color: "#0f1d63", m: 0 }}
+      sx={{
+        fontSize: "24px",
+        fontWeight: 600,
+        color: "#0f1d63",
+        m: 0,
+        lineHeight: "32px",
+      }}
     >
       {children}
     </Typography>
