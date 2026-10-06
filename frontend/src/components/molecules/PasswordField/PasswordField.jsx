@@ -36,13 +36,24 @@ const PasswordField = ({ value, onChange }) => {
               <IconButton
                 onClick={clickShowPassword}
                 edge="end"
-                size="small"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <VisibilityOffOutlined fontSize="small" />
+                  <VisibilityOffOutlined
+                    sx={{
+                      "&.MuiSvgIcon-root": {
+                        fontSize: "18px",
+                      },
+                    }}
+                  />
                 ) : (
-                  <VisibilityOutlined fontSize="small" />
+                  <VisibilityOutlined
+                    sx={{
+                      "&.MuiSvgIcon-root": {
+                        fontSize: "18px",
+                      },
+                    }}
+                  />
                 )}
               </IconButton>
             </InputAdornment>

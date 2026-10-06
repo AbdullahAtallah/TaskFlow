@@ -6,27 +6,10 @@ const DashboardPage = () => {
   return (
     <>
       <PageHeader
-        title="Welcome back, Sara"
-        subtitle="6 open tasks assigned to you · 30 sep 2026"
+        title="Teams"
+        subtitle="All teams in the organisation"
         actions={
           <>
-            <Button
-              variant="outlined"
-              sx={{
-                textTransform: "none",
-                backgroundColor: "#ffffff",
-                color: "#111827",
-                border: "1px solid #e5e7eb",
-                fontWeight: 500,
-                fontSize: 14,
-                p: "0 12px",
-                height: "38px",
-                borderRadius: "6px",
-                boxShadow: 0,
-              }}
-            >
-              New project
-            </Button>
             <Button
               variant="contained"
               sx={{
@@ -40,7 +23,7 @@ const DashboardPage = () => {
                 boxShadow: 0,
               }}
             >
-              New task
+              New team
             </Button>
           </>
         }

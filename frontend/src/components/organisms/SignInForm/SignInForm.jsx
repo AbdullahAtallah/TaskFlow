@@ -1,4 +1,5 @@
-import { Box, Button, Link, Typography, Stack } from "@mui/material";
+import { Box, Button, Typography, Stack, Link } from "@mui/material";
+import { Link as RouterLink } from "react-router";
 
 import EmailField from "../../molecules/EmailField/EmailField";
 import PasswordField from "../../molecules/PasswordField/PasswordField";
@@ -64,7 +65,8 @@ const SignInForm = () => {
               Password
             </Typography>
             <Link
-              href="#"
+              component={RouterLink}
+              to="#"
               underline="hover"
               sx={{
                 fontSize: "14px",
@@ -117,7 +119,8 @@ const SignInForm = () => {
           <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
             No account yet?{" "}
             <Link
-              href="/create-account"
+              component={RouterLink}
+              to="/create-account"
               underline="hover"
               sx={{
                 fontSize: "14px",
