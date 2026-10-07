@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 
-const DashboardPage = () => {
+const RolePage = () => {
   return (
     <>
       <PageHeader title="Roles" subtitle="Permissions come only from roles" />
@@ -11,4 +11,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default RolePage;

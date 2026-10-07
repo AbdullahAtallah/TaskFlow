@@ -1,5 +1,5 @@
 import { Box, Stack, Typography } from "@mui/material";
-import RoleChip from "../../atoms/RoleChip/RoleChip";
+import Tag from "../../atoms/Tag/Tag";
 import UserAvatar from "../../atoms/UserAvatar/UserAvatar";
 
 const UserInfo = ({ name, email, role }) => {
@@ -8,7 +8,7 @@ const UserInfo = ({ name, email, role }) => {
       direction="row"
       sx={{ alignItems: "center", gap: "13px", cursor: "pointer" }}
     >
-      <RoleChip>{role}</RoleChip>
+      <Tag>{role}</Tag>
       <UserAvatar name={name} online />
       <Box>
         <Typography

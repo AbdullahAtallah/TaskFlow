@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 
-const DashboardPage = () => {
+const ProjectsPage = () => {
   return (
     <>
       <PageHeader
@@ -35,4 +35,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage;
+export default ProjectsPage;

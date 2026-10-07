@@ -9,7 +9,7 @@ const getInitials = (name = "") =>
     .slice(0, 2)
     .join("");
 
-const UserAvatar = ({ name, size = 32, online = false }) => {
+const UserAvatar = ({ name, size = 32, online = false, sx }) => {
   const avatar = (
     <Avatar
       sx={{
@@ -20,6 +20,7 @@ const UserAvatar = ({ name, size = 32, online = false }) => {
         bgcolor: "#e9f7ef",
         color: "#1b7a5e",
         border: ".5px solid #d2d2d2",
+        ...sx,
       }}
     >
       {getInitials(name)}
