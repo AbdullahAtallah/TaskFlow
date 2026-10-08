@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useLocation } from "react-router";
+import { useLocation, Link } from "react-router";
 import AppBreadcrumbs from "../../molecules/AppBreadcrumbs/AppBreadcrumbs";
 import UserInfo from "../../molecules/UserInfo/UserInfo";
 
@@ -32,7 +32,10 @@ const Topbar = () => {
       }}
     >
       <AppBreadcrumbs items={crumbsByPath[pathname] ?? []} />
-      <UserInfo name={user.name} email={user.email} role={user.role} />
+      <Link to="/profile" style={{ textDecoration: "none" }}>
+        {" "}
+        <UserInfo name={user.name} email={user.email} role={user.role} />
+      </Link>
     </Box>
   );
 };
