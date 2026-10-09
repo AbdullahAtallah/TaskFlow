@@ -1,12 +1,32 @@
-import { TextField } from "@mui/material";
-const EmailField = ({ value, onChange }) => {
+import { useState } from "react";
+import { InputAdornment, TextField as MuiTextField } from "@mui/material";
+import PasswordToggle from "../../atoms/PasswordToggle/PasswordToggle";
+
+const TextField = ({ value, onChange, placeholder, type = "text" }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+
   return (
-    <TextField
+    <MuiTextField
       fullWidth
-      placeholder="e.g. Laura Bakker"
-      type="text"
+      placeholder={placeholder}
+      type={isPassword && showPassword ? "text" : type}
       value={value}
       onChange={onChange}
+      slotProps={{
+        input: isPassword
+          ? {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <PasswordToggle
+                    visible={showPassword}
+                    onToggle={() => setShowPassword((show) => !show)}
+                  />
+                </InputAdornment>
+              ),
+            }
+          : undefined,
+      }}
       sx={{
         "& .MuiOutlinedInput-input": { py: 1.25, fontSize: 14 },
         "& .MuiOutlinedInput-notchedOutline": {
@@ -27,4 +47,4 @@ const EmailField = ({ value, onChange }) => {
   );
 };
 
-export default EmailField;
+export default TextField;

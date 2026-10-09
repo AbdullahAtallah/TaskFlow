@@ -1,8 +1,6 @@
 import { Box, Button, Typography, Stack, Link } from "@mui/material";
 import { Link as RouterLink } from "react-router";
-
-import EmailField from "../../molecules/EmailField/EmailField";
-import PasswordField from "../../molecules/PasswordField/PasswordField";
+import TextField from "../../molecules/TextField/TextField";
 import RememberMe from "../../molecules/RememberMe/RememberMe";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
@@ -42,7 +40,9 @@ const SignInForm = () => {
                 E-mail
               </Typography>
             </Box>
-            <EmailField
+            <TextField
+              type="email"
+              placeholder="name@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
@@ -78,7 +78,8 @@ const SignInForm = () => {
               Forgot password?
             </Link>
           </Box>
-          <PasswordField
+          <TextField
+            type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />

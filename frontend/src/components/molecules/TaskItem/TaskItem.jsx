@@ -1,9 +1,11 @@
 import { Box, Stack, Typography } from "@mui/material";
 import PriorityChip from "../../atoms/PriorityChip/PriorityChip";
+import { Link as RouterLink } from "react-router";
 
 const TaskItem = ({ title, project, due, overdue = false, priority }) => {
   return (
     <Box
+      component={RouterLink}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -12,6 +14,10 @@ const TaskItem = ({ title, project, due, overdue = false, priority }) => {
         p: "12px 20px",
         borderBottom: "1px solid #e5e7eb",
         "&:last-of-type": { borderBottom: 0 },
+        cursor: "pointer",
+        "&:hover": { backgroundColor: "#fafbfc" },
+        transition: "background-color 0.15s",
+        textDecoration: "none",
       }}
     >
       <Box sx={{ minWidth: 0 }}>

@@ -1,7 +1,5 @@
 import { Box, Button, Link, Typography, Stack } from "@mui/material";
 import { Link as RouterLink } from "react-router";
-import EmailField from "../../molecules/EmailField/EmailField";
-import PasswordField from "../../molecules/PasswordField/PasswordField";
 import TextField from "../../molecules/TextField/TextField";
 import AcceptTerms from "../../molecules/AcceptTerms/AcceptTerms";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
@@ -12,6 +10,7 @@ const CreateAccountForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleSubmit = (event) => {
@@ -46,8 +45,10 @@ const CreateAccountForm = () => {
               </Typography>
             </Box>
             <TextField
+              type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. Laura Bakker"
             />
           </Box>
         </Box>
@@ -73,9 +74,11 @@ const CreateAccountForm = () => {
                 E-mail
               </Typography>
             </Box>
-            <EmailField
+            <TextField
+              type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              placeholder="name@example.com"
             />
           </Box>
         </Box>
@@ -96,7 +99,8 @@ const CreateAccountForm = () => {
               Password
             </Typography>
           </Box>
-          <PasswordField
+          <TextField
+            type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
@@ -120,9 +124,10 @@ const CreateAccountForm = () => {
               Repeat password
             </Typography>
           </Box>
-          <PasswordField
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
+          <TextField
+            type="password"
+            value={repeatPassword}
+            onChange={(event) => setRepeatPassword(event.target.value)}
           />
         </Box>
         <Box>
