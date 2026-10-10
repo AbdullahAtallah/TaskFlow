@@ -51,6 +51,7 @@ const TextField = ({
             border: 0,
             boxShadow: "0 0 0 4px #365AFF2E",
           },
+        ...sx,
       }}
     />
   );
