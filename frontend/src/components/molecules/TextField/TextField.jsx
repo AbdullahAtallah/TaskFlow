@@ -2,17 +2,26 @@ import { useState } from "react";
 import { InputAdornment, TextField as MuiTextField } from "@mui/material";
 import PasswordToggle from "../../atoms/PasswordToggle/PasswordToggle";
 
-const TextField = ({ value, onChange, placeholder, type = "text" }) => {
+const TextField = ({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  fullWidth = true,
+  sx,
+  ...props
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
   return (
     <MuiTextField
-      fullWidth
+      fullWidth={fullWidth}
       placeholder={placeholder}
       type={isPassword && showPassword ? "text" : type}
       value={value}
       onChange={onChange}
+      {...props}
       slotProps={{
         input: isPassword
           ? {
