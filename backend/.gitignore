@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+
+# Test results
+TestResults/
+*.trx
+
+# IDE and user-specific files
+.vs/
+.idea/
+*.user
+*.suo
+*.DotSettings.user

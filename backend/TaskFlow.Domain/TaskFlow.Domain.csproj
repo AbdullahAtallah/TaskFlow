@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Target Name="ValidateNoDependencies" BeforeTargets="Build">
+    <Error Condition="'@(PackageReference)' != ''"
+           Text="Domain project should not have dependencies. Found: @(PackageReference)" />
+    <Error Condition="'@(ProjectReference)' != ''"
+           Text="Domain project should not reference other projects. Found: @(ProjectReference)" />
+  </Target>
+</Project>
