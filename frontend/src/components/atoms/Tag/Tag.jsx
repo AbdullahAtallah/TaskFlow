@@ -4,6 +4,7 @@ const tones = {
   neutral: { backgroundColor: "#f5f5f5", color: "#5d5d5d" },
   purple: { backgroundColor: "#fbf5ff", color: "#6300a5" },
   success: { backgroundColor: "#f2fff2", color: "#13790e" },
+  info: { backgroundColor: "#eff7ff", color: "#365aff" },
 };
 
 const Tag = ({ children, tone = "neutral" }) => {
