@@ -1,15 +1,26 @@
 import { Avatar, Badge } from "@mui/material";
 
+const palette = [
+  { bg: "#ece0f6", fg: "#6300a5" },
+  { bg: "#e7f6e0", fg: "#0f1d63" },
+  { bg: "#feebec", fg: "#cf580f" },
+  { bg: "#e8f8f5", fg: "#1b7a5e" },
+];
+
 const getInitials = (name = "") =>
   name
     .split(" ")
     .filter(Boolean)
-    .map((part) => part[0])
-    .filter((ch) => ch === ch.toUpperCase())
     .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
     .join("");
 
+const pickColor = (name = "") =>
+  palette[name.charCodeAt(0) % palette.length] ?? palette[0];
+
 const UserAvatar = ({ name, size = 32, online = false, sx }) => {
+  const { bg, fg } = pickColor(name);
+
   const avatar = (
     <Avatar
       sx={{
@@ -17,8 +28,8 @@ const UserAvatar = ({ name, size = 32, online = false, sx }) => {
         height: size,
         fontSize: 13,
         fontWeight: 600,
-        bgcolor: "#e9f7ef",
-        color: "#1b7a5e",
+        bgcolor: bg,
+        color: fg,
         border: ".5px solid #d2d2d2",
         ...sx,
       }}
