@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <!-- Application can only reference Domain -->
+    <ProjectReference Include="..\TaskFlow.Domain\TaskFlow.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <Target Name="ValidateApplicationDependencies" BeforeTargets="Build">
+    <ItemGroup>
+      <ForbiddenPackages Include="@(PackageReference)"
+                         Condition="'%(Identity)' == 'Microsoft.EntityFrameworkCore' OR
+                                    '%(Identity)' == 'Microsoft.EntityFrameworkCore.SqlServer' OR
+                                    '%(Identity)' == 'Microsoft.Data.SqlClient'" />
+      <AllowedProjects Include="..\TaskFlow.Domain\TaskFlow.Domain.csproj" />
+      <ForbiddenProjects Include="@(ProjectReference)" Exclude="@(AllowedProjects)" />
+    </ItemGroup>
+    <Error Condition="'@(ForbiddenPackages)' != ''"
+           Text="Application project should not depend on infrastructure packages. Found: @(ForbiddenPackages)" />
+    <Error Condition="'@(ForbiddenProjects)' != ''"
+           Text="Application project should only reference the Domain project. Found: @(ForbiddenProjects)" />
+  </Target>
+</Project>

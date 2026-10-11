@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Infrastructure references Application and Domain -->
+    <ProjectReference Include="..\TaskFlow.Application\TaskFlow.Application.csproj" />
+    <ProjectReference Include="..\TaskFlow.Domain\TaskFlow.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Brings the token handler and keys that the access tokens are signed with -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TaskFlow.IntegrationTests" />
+  </ItemGroup>
+
+  <Target Name="ValidateInfrastructureDependencies" BeforeTargets="Build">
+    <ItemGroup>
+      <AllowedProjects Include="..\TaskFlow.Application\TaskFlow.Application.csproj" />
+      <AllowedProjects Include="..\TaskFlow.Domain\TaskFlow.Domain.csproj" />
+      <ForbiddenProjects Include="@(ProjectReference)" Exclude="@(AllowedProjects)" />
+    </ItemGroup>
+    <Error Condition="'@(ForbiddenProjects)' != ''"
+           Text="Infrastructure project should only reference the Application and Domain projects. Found: @(ForbiddenProjects)" />
+  </Target>
+</Project>
