@@ -8,6 +8,7 @@ const NavItem = ({ to, icon: Icon, label, count, onClick }) => {
   return (
     <ButtonBase
       {...linkProps}
+      disableRipple
       sx={{
         width: "100%",
         height: "38px",
