@@ -15,6 +15,16 @@ public static class RoleRules
 
         validator.RuleFor(command => command.Description).OptionalText("Description", FieldLengths.RoleDescription);
 
+        // Everyone who registers gets the role for new users, so it must never open user and role management.
+        validator.RuleFor(command => command.Packages)
+            .Must((command, packages) => !command.IsDefault || packages?.Contains(PackageTypes.Management) != true)
+            .WithMessage(ErrorMessages.RoleForNewUsersCannotGrantManagement);
+
+        validator.AddRolePermissionRules();
+    }
+
+    public static void AddRolePermissionRules<T>(this AbstractValidator<T> validator) where T : IRolePermissionsCommand
+    {
         validator.RuleFor(command => command.Packages)
             .NotNull()
             .WithMessage("Packages are required.")
@@ -24,11 +34,6 @@ public static class RoleRules
         validator.RuleForEach(command => command.Packages)
             .Must(packageId => PackageTypes.All.Contains(packageId))
             .WithMessage((_, packageId) => $"'{packageId}' is not a package.");
-
-        // Everyone who registers gets the role for new users, so it must never open user and role management.
-        validator.RuleFor(command => command.Packages)
-            .Must((command, packages) => !command.IsDefault || packages?.Contains(PackageTypes.Management) != true)
-            .WithMessage(ErrorMessages.RoleForNewUsersCannotGrantManagement);
 
         validator.RuleFor(command => command.Claims)
             .NotNull()

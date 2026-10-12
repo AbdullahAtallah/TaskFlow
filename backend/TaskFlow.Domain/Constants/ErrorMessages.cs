@@ -38,9 +38,7 @@ public static class ErrorMessages
     public const string RolesNotFound = "One or more roles could not be found.";
     public const string RoleNameAlreadyInUse = "A role with this name already exists.";
     public const string DefaultRoleCannotBeDeleted = "Default roles cannot be deleted.";
-    public const string DefaultRoleCannotBeRenamed = "Default roles cannot be renamed.";
     public const string RoleForNewUsersCannotBeDeleted = "The role for new users cannot be deleted. Make another role the default first.";
-    public const string RoleForNewUsersRequired = "Exactly one role must be the default for new users. Make another role the default instead.";
     public const string RoleForNewUsersCannotGrantManagement = "The role for new users cannot grant user and role management.";
     public const string RoleStillAssigned = "This role is still assigned to users. Give them another role first.";
 }

@@ -14,7 +14,7 @@ public class TaskBoardController(ITaskDataReader taskDataReader) : ControllerBas
     /// <summary>The tasks of a project in To do / In progress / Done columns.</summary>
     [HttpGet]
     [Claim(ClaimTypes.TasksBoardView)]
-    public async Task<ActionResult<TaskBoardDto>> Get([FromQuery] GetTaskBoardQuery filter)
+    public async Task<ActionResult> Get([FromQuery] GetTaskBoardQuery filter)
     {
         return Ok(await taskDataReader.GetBoardAsync(filter));
     }

@@ -10,8 +10,6 @@ public sealed class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCom
     {
         RuleFor(command => command.Id).RequiredId("Role");
 
-        this.AddRoleFieldRules();
-
-        RuleFor(command => command.RowVersion).RequiredRowVersion();
+        this.AddRolePermissionRules();
     }
 }

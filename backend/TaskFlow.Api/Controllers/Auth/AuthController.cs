@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using TaskFlow.Api.Configurations;
 using TaskFlow.Application.Commands.Auth.Login;
 using TaskFlow.Application.Commands.Auth.Register;
-using TaskFlow.Application.Identity;
 
 namespace TaskFlow.Api.Controllers.Auth;
 
@@ -16,14 +15,11 @@ namespace TaskFlow.Api.Controllers.Auth;
 [ApiController]
 [AllowAnonymous]
 [EnableRateLimiting(RateLimitingConfiguration.SignInPolicy)]
-[ProducesResponseType(StatusCodes.Status429TooManyRequests)]
 public class AuthController(RegisterCommandHandler registerCommandHandler, LoginCommandHandler loginCommandHandler) : ControllerBase
 {
     /// <summary>Creates an account with the role for new users and signs it in.</summary>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(AccessTokenDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<AccessTokenDto>> Register([FromBody] RegisterCommand command)
+    public async Task<ActionResult> Register([FromBody] RegisterCommand command)
     {
         return Created("/api/user/current", await registerCommandHandler.Execute(command));
     }
@@ -33,10 +29,7 @@ public class AuthController(RegisterCommandHandler registerCommandHandler, Login
     /// address 429 too_many_attempts.
     /// </summary>
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AccessTokenDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<AccessTokenDto>> Login([FromBody] LoginCommand command)
+    public async Task<ActionResult> Login([FromBody] LoginCommand command)
     {
         return Ok(await loginCommandHandler.Execute(command));
     }

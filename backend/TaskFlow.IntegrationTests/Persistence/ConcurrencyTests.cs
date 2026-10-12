@@ -56,25 +56,6 @@ public sealed class ConcurrencyTests(TaskFlowFixture fixture) : IntegrationTestB
     }
 
     [Fact]
-    public async Task ChangingOnlyTheGrantsOfARole_GivesItANewVersion_SoAnOlderFormCannotUndoThem()
-    {
-        var role = await Data.RoleAsync([PackageTypes.Tasks], [ClaimTypes.TasksCreate], name: "Planner");
-
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/role/{role.Id}", new
-        {
-            name = "Planner", isDefault = false, packages = new[] { PackageTypes.Tasks },
-            claims = new[] { ClaimTypes.TasksCreate, ClaimTypes.TasksManage }, rowVersion = role.RowVersion
-        });
-        var refused = await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{role.Id}", new
-        {
-            name = "Planner", isDefault = false, packages = new[] { PackageTypes.Tasks },
-            claims = new[] { ClaimTypes.TasksCreate }, rowVersion = role.RowVersion
-        });
-
-        refused.ShouldBeError(ErrorMessages.ChangedByAnotherUser);
-    }
-
-    [Fact]
     public async Task ASave_OverAChangeSavedAfterTheLoad_IsRefusedBySqlServer()
     {
         var member = await Data.UserAsync();

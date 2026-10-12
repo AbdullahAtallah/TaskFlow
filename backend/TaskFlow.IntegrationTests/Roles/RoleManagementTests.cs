@@ -1,12 +1,12 @@
 using System.Net;
-using System.Net.Http.Json;
+// using System.Net.Http.Json;
 using AwesomeAssertions;
-using Microsoft.EntityFrameworkCore;
+// using Microsoft.EntityFrameworkCore;
 using TaskFlow.Application.Common.Filtering;
 using TaskFlow.Application.Queries.Roles;
 using TaskFlow.Domain.Constants;
-using TaskFlow.Domain.Entities.Authorization;
-using TaskFlow.Domain.Enums;
+// using TaskFlow.Domain.Entities.Authorization;
+// using TaskFlow.Domain.Enums;
 using TaskFlow.IntegrationTests.Infrastructure;
 
 namespace TaskFlow.IntegrationTests.Roles;
@@ -74,73 +74,77 @@ public sealed class RoleManagementTests(TaskFlowFixture fixture) : IntegrationTe
         await (await SendAsync(AdminEmail, HttpMethod.Get, $"/api/role/{Guid.NewGuid()}/user")).ShouldHaveStatusAsync(HttpStatusCode.NotFound);
     }
 
-    [Fact]
-    public async Task Create_StoresTheRole_AndAlwaysGrantsGeneral()
-    {
-        var notification = await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role", new
-        {
-            name = "Planner",
-            description = "Plans the work",
-            isDefault = false,
-            packages = new[] { PackageTypes.Projects, PackageTypes.Tasks },
-            claims = new[] { ClaimTypes.ProjectsCreate, ClaimTypes.TasksBoardView }
-        });
-
-        notification.EntityType.Should().Be(EntityType.Role);
-        var details = await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{notification.EntityId}");
-        details.Name.Should().Be("Planner");
-        details.IsBuiltIn.Should().BeFalse();
-        details.Packages.Should().BeEquivalentTo(PackageTypes.General, PackageTypes.Projects, PackageTypes.Tasks);
-        details.Claims.Should().BeEquivalentTo(ClaimTypes.ProjectsCreate, ClaimTypes.TasksBoardView);
-    }
-
-    [Fact]
-    public async Task Create_WithANameInUseOrAClaimOutsideItsPackages_IsRefused()
-    {
-        (await SendCommandAsync(AdminEmail, HttpMethod.Post, "/api/role",
-                new { name = "admin", isDefault = false, packages = Array.Empty<string>(), claims = Array.Empty<string>() }))
-            .ShouldBeError(ErrorMessages.RoleNameAlreadyInUse);
-        (await SendCommandAsync(AdminEmail, HttpMethod.Post, "/api/role",
-                new { name = "Planner", isDefault = false, packages = new[] { PackageTypes.Projects }, claims = new[] { ClaimTypes.TasksManage } }))
-            .ShouldBeError("The claim 'Tasks.Manage' requires the Tasks package.");
-    }
+    // The roles are seeded: creating and deleting them is commented out in RoleController, and so are these tests.
+    // [Fact]
+    // public async Task Create_StoresTheRole_AndAlwaysGrantsGeneral()
+    // {
+    //     var notification = await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role", new
+    //     {
+    //         name = "Planner",
+    //         description = "Plans the work",
+    //         isDefault = false,
+    //         packages = new[] { PackageTypes.Projects, PackageTypes.Tasks },
+    //         claims = new[] { ClaimTypes.ProjectsCreate, ClaimTypes.TasksBoardView }
+    //     });
+    //
+    //     notification.EntityType.Should().Be(EntityType.Role);
+    //     var details = await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{notification.EntityId}");
+    //     details.Name.Should().Be("Planner");
+    //     details.IsBuiltIn.Should().BeFalse();
+    //     details.Packages.Should().BeEquivalentTo(PackageTypes.General, PackageTypes.Projects, PackageTypes.Tasks);
+    //     details.Claims.Should().BeEquivalentTo(ClaimTypes.ProjectsCreate, ClaimTypes.TasksBoardView);
+    // }
+    //
+    // [Fact]
+    // public async Task Create_WithANameInUseOrAClaimOutsideItsPackages_IsRefused()
+    // {
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Post, "/api/role",
+    //             new { name = "admin", isDefault = false, packages = Array.Empty<string>(), claims = Array.Empty<string>() }))
+    //         .ShouldBeError(ErrorMessages.RoleNameAlreadyInUse);
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Post, "/api/role",
+    //             new { name = "Planner", isDefault = false, packages = new[] { PackageTypes.Projects }, claims = new[] { ClaimTypes.TasksManage } }))
+    //         .ShouldBeError("The claim 'Tasks.Manage' requires the Tasks package.");
+    // }
 
     [Fact]
     public async Task TheRoleForNewUsers_CanNeverGrantManagement()
     {
         var userRole = await Data.RoleNamedAsync(DefaultRoleBundles.UserRoleName);
 
-        (await SendCommandAsync(AdminEmail, HttpMethod.Post, "/api/role", new
-            {
-                name = "Everyone an admin", isDefault = true,
-                packages = new[] { PackageTypes.Management }, claims = Array.Empty<string>()
-            }))
-            .ShouldBeError(ErrorMessages.RoleForNewUsersCannotGrantManagement);
         (await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{userRole.Id}", new
             {
-                name = DefaultRoleBundles.UserRoleName, isDefault = true,
-                packages = DefaultRoleBundles.User.PackageIds.Append(PackageTypes.Management), claims = DefaultRoleBundles.User.ClaimIds,
-                rowVersion = userRole.RowVersion
+                packages = DefaultRoleBundles.User.PackageIds.Append(PackageTypes.Management), claims = DefaultRoleBundles.User.ClaimIds
             }))
             .ShouldBeError(ErrorMessages.RoleForNewUsersCannotGrantManagement);
+        (await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{userRole.Id}")).Packages.Should().NotContain(PackageTypes.Management);
     }
 
     [Fact]
-    public async Task Create_AsTheDefault_TakesOverFromThePreviousDefault()
+    public async Task Update_WithAClaimOutsideItsPackages_IsRefused()
     {
-        var notification = await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role",
-            new { name = "Newcomer", isDefault = true, packages = new[] { PackageTypes.Teams }, claims = Array.Empty<string>() });
+        var readOnlyRole = await Data.RoleNamedAsync(DefaultRoleBundles.ReadOnlyUserRoleName);
 
-        var defaultRoles = await Data.QueryAsync(dbContext => dbContext.Roles.Where(role => role.IsDefault).Select(role => role.Id).ToListAsync());
-        defaultRoles.Should().Equal(notification.EntityId!.Value);
-
-        var registration = await Factory.CreateClient().PostAsJsonAsync("/api/auth/register",
-            new { email = "brand.new@taskflow.test", displayName = "Brand New", password = "Brand-new-1" }, TestJson.Options);
-        await registration.ShouldHaveStatusAsync(HttpStatusCode.Created);
-
-        var newcomer = await GetAsync<Authentication.CurrentUserResponse>("brand.new@taskflow.test", "/api/user/current");
-        newcomer.Roles.Select(role => role.Name).Should().Equal("Newcomer");
+        (await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{readOnlyRole.Id}",
+                new { packages = new[] { PackageTypes.Projects }, claims = new[] { ClaimTypes.TasksManage } }))
+            .ShouldBeError("The claim 'Tasks.Manage' requires the Tasks package.");
     }
+
+    // [Fact]
+    // public async Task Create_AsTheDefault_TakesOverFromThePreviousDefault()
+    // {
+    //     var notification = await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role",
+    //         new { name = "Newcomer", isDefault = true, packages = new[] { PackageTypes.Teams }, claims = Array.Empty<string>() });
+    //
+    //     var defaultRoles = await Data.QueryAsync(dbContext => dbContext.Roles.Where(role => role.IsDefault).Select(role => role.Id).ToListAsync());
+    //     defaultRoles.Should().Equal(notification.EntityId!.Value);
+    //
+    //     var registration = await Factory.CreateClient().PostAsJsonAsync("/api/auth/register",
+    //         new { email = "brand.new@taskflow.test", displayName = "Brand New", password = "Brand-new-1" }, TestJson.Options);
+    //     await registration.ShouldHaveStatusAsync(HttpStatusCode.Created);
+    //
+    //     var newcomer = await GetAsync<Authentication.CurrentUserResponse>("brand.new@taskflow.test", "/api/user/current");
+    //     newcomer.Roles.Select(role => role.Name).Should().Equal("Newcomer");
+    // }
 
     [Fact]
     public async Task Update_ChangesTheClaims_AndTheyApplyOnTheUsersNextRequest()
@@ -152,39 +156,32 @@ public sealed class RoleManagementTests(TaskFlowFixture fixture) : IntegrationTe
 
         await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/role/{userRole.Id}", new
         {
-            name = DefaultRoleBundles.UserRoleName,
-            description = "Works in teams",
-            isDefault = true,
             packages = DefaultRoleBundles.User.PackageIds,
-            claims = DefaultRoleBundles.User.ClaimIds.Where(claimId => claimId != ClaimTypes.ProjectsCreate),
-            rowVersion = userRole.RowVersion
+            claims = DefaultRoleBundles.User.ClaimIds.Where(claimId => claimId != ClaimTypes.ProjectsCreate)
         });
 
         var refused = await SendAsync(member.UserName, HttpMethod.Post, "/api/project", new { teamId = team.Id, name = "Refused" });
         await refused.ShouldHaveStatusAsync(HttpStatusCode.Forbidden);
-        (await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{userRole.Id}")).Description.Should().Be("Works in teams");
+        (await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{userRole.Id}")).Claims.Should().NotContain(ClaimTypes.ProjectsCreate);
     }
 
     [Fact]
-    public async Task Update_MakingTheDefaultRoleNotDefault_OrRenamingADefaultRole_IsRefused()
+    public async Task Update_OneSwitchAtATime_SavesEveryChange_AndAlwaysKeepsGeneral()
     {
-        var userRole = await Data.RoleNamedAsync(DefaultRoleBundles.UserRoleName);
         var readOnlyRole = await Data.RoleNamedAsync(DefaultRoleBundles.ReadOnlyUserRoleName);
+        var packages = DefaultRoleBundles.ReadOnlyUser.PackageIds.Where(packageId => packageId != PackageTypes.General).ToList();
+        var claims = DefaultRoleBundles.ReadOnlyUser.ClaimIds.ToList();
 
-        (await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{userRole.Id}", new
-            {
-                name = DefaultRoleBundles.UserRoleName, isDefault = false,
-                packages = DefaultRoleBundles.User.PackageIds, claims = DefaultRoleBundles.User.ClaimIds,
-                rowVersion = userRole.RowVersion
-            }))
-            .ShouldBeError(ErrorMessages.RoleForNewUsersRequired);
-        (await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{readOnlyRole.Id}", new
-            {
-                name = "Viewers", isDefault = false,
-                packages = DefaultRoleBundles.ReadOnlyUser.PackageIds, claims = DefaultRoleBundles.ReadOnlyUser.ClaimIds,
-                rowVersion = readOnlyRole.RowVersion
-            }))
-            .ShouldBeError(ErrorMessages.DefaultRoleCannotBeRenamed);
+        // The role details page saves each switch on its own, without a row version: the latest change wins.
+        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/role/{readOnlyRole.Id}",
+            new { packages, claims = claims.Append(ClaimTypes.TasksCreate) });
+        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/role/{readOnlyRole.Id}",
+            new { packages, claims = claims.Append(ClaimTypes.TasksCreate).Append(ClaimTypes.TasksManage) });
+
+        var details = await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{readOnlyRole.Id}");
+        details.Name.Should().Be(DefaultRoleBundles.ReadOnlyUserRoleName);
+        details.Packages.Should().Contain(PackageTypes.General);
+        details.Claims.Should().Contain([ClaimTypes.TasksCreate, ClaimTypes.TasksManage]);
     }
 
     [Fact]
@@ -194,48 +191,45 @@ public sealed class RoleManagementTests(TaskFlowFixture fixture) : IntegrationTe
 
         var notification = await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/role/{adminRole.Id}", new
         {
-            name = DefaultRoleBundles.AdminRoleName,
-            isDefault = false,
             packages = DefaultRoleBundles.User.PackageIds,
-            claims = DefaultRoleBundles.User.ClaimIds,
-            rowVersion = adminRole.RowVersion
+            claims = DefaultRoleBundles.User.ClaimIds
         });
 
         notification.ShouldBeError(ErrorMessages.CannotRemoveOwnManagementAccess);
         (await GetAsync<RoleDetailDto>(AdminEmail, $"/api/role/{adminRole.Id}")).Packages.Should().Contain(PackageTypes.Management);
     }
 
-    [Fact]
-    public async Task Delete_OfADefaultRole_TheRoleForNewUsers_OrAnAssignedRole_IsRefused()
-    {
-        var adminRole = await Data.RoleNamedAsync(DefaultRoleBundles.AdminRoleName);
-        var newcomerRole = await Data.RoleAsync([PackageTypes.Teams], [], name: "Newcomer");
-        await Data.ExecuteAsync(async dbContext =>
-        {
-            foreach (var role in await dbContext.Roles.ToListAsync())
-            {
-                role.IsDefault = role.Id == newcomerRole.Id;
-            }
-        });
-        var assignedRole = await Data.RoleAsync([PackageTypes.Teams], [], name: "Assigned");
-        await Data.UserInRolesAsync([assignedRole.Name]);
-
-        (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{adminRole.Id}")).ShouldBeError(ErrorMessages.DefaultRoleCannotBeDeleted);
-        (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{newcomerRole.Id}")).ShouldBeError(ErrorMessages.RoleForNewUsersCannotBeDeleted);
-        (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{assignedRole.Id}")).ShouldBeError(ErrorMessages.RoleStillAssigned);
-    }
-
-    [Fact]
-    public async Task Delete_OfAnUnusedRole_SoftDeletesIt_AndFreesItsName()
-    {
-        var role = await Data.RoleAsync([PackageTypes.Teams], [ClaimTypes.TeamsViewAll], name: "Temporary");
-
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{role.Id}");
-
-        (await Data.FindIncludingDeletedAsync<RoleEntity>(role.Id))!.DateTimeDeleted.Should().NotBeNull();
-        (await Data.QueryAsync(dbContext => dbContext.RoleClaims.AnyAsync(roleClaim => roleClaim.RoleId == role.Id))).Should().BeFalse();
-        await (await SendAsync(AdminEmail, HttpMethod.Get, $"/api/role/{role.Id}")).ShouldHaveStatusAsync(HttpStatusCode.NotFound);
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role",
-            new { name = "Temporary", isDefault = false, packages = Array.Empty<string>(), claims = Array.Empty<string>() });
-    }
+    // [Fact]
+    // public async Task Delete_OfADefaultRole_TheRoleForNewUsers_OrAnAssignedRole_IsRefused()
+    // {
+    //     var adminRole = await Data.RoleNamedAsync(DefaultRoleBundles.AdminRoleName);
+    //     var newcomerRole = await Data.RoleAsync([PackageTypes.Teams], [], name: "Newcomer");
+    //     await Data.ExecuteAsync(async dbContext =>
+    //     {
+    //         foreach (var role in await dbContext.Roles.ToListAsync())
+    //         {
+    //             role.IsDefault = role.Id == newcomerRole.Id;
+    //         }
+    //     });
+    //     var assignedRole = await Data.RoleAsync([PackageTypes.Teams], [], name: "Assigned");
+    //     await Data.UserInRolesAsync([assignedRole.Name]);
+    //
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{adminRole.Id}")).ShouldBeError(ErrorMessages.DefaultRoleCannotBeDeleted);
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{newcomerRole.Id}")).ShouldBeError(ErrorMessages.RoleForNewUsersCannotBeDeleted);
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{assignedRole.Id}")).ShouldBeError(ErrorMessages.RoleStillAssigned);
+    // }
+    //
+    // [Fact]
+    // public async Task Delete_OfAnUnusedRole_SoftDeletesIt_AndFreesItsName()
+    // {
+    //     var role = await Data.RoleAsync([PackageTypes.Teams], [ClaimTypes.TeamsViewAll], name: "Temporary");
+    //
+    //     await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/role/{role.Id}");
+    //
+    //     (await Data.FindIncludingDeletedAsync<RoleEntity>(role.Id))!.DateTimeDeleted.Should().NotBeNull();
+    //     (await Data.QueryAsync(dbContext => dbContext.RoleClaims.AnyAsync(roleClaim => roleClaim.RoleId == role.Id))).Should().BeFalse();
+    //     await (await SendAsync(AdminEmail, HttpMethod.Get, $"/api/role/{role.Id}")).ShouldHaveStatusAsync(HttpStatusCode.NotFound);
+    //     await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/role",
+    //         new { name = "Temporary", isDefault = false, packages = Array.Empty<string>(), claims = Array.Empty<string>() });
+    // }
 }
