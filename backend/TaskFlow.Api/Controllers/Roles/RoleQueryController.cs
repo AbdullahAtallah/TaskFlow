@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Application.Common.Filtering;
 using TaskFlow.Application.Interfaces.DataReaders;
 using TaskFlow.Application.Queries.Roles;
 using TaskFlow.Domain.Constants;
@@ -13,21 +12,21 @@ namespace TaskFlow.Api.Controllers.Roles;
 public class RoleQueryController(IRoleDataReader roleDataReader) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<FilteringResult<RoleRowDto>>> Get([FromQuery] GetRolesQuery filter)
+    public async Task<ActionResult> Get([FromQuery] GetRolesQuery filter)
     {
         return Ok(await roleDataReader.GetGridAsync(filter));
     }
 
     /// <summary>A single role with its packages and claims.</summary>
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<RoleDetailDto>> Get(Guid id)
+    public async Task<ActionResult> Get(Guid id)
     {
         return Ok(await roleDataReader.GetByIdAsync(id));
     }
 
     /// <summary>The users assigned to the role.</summary>
     [HttpGet("{id:guid}/user")]
-    public async Task<ActionResult<FilteringResult<RoleUserDto>>> GetUsers(Guid id, [FromQuery] GetRoleUsersQuery filter)
+    public async Task<ActionResult> GetUsers(Guid id, [FromQuery] GetRoleUsersQuery filter)
     {
         return Ok(await roleDataReader.GetUsersAsync(id, filter));
     }

@@ -13,10 +13,6 @@ namespace TaskFlow.Api.Shared;
 /// Base of the write controllers: a command is published on the Wolverine bus and handled in the background;
 /// its result reaches the user as a Done or Error notification over SignalR.
 /// </summary>
-[ProducesResponseType(StatusCodes.Status202Accepted)]
-[ProducesResponseType(StatusCodes.Status400BadRequest)]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public abstract class CommandControllerBase(
     IMessageBus messageBus,
     ISendNotificationCommandHandler sendNotificationCommandHandler,
@@ -26,7 +22,7 @@ public abstract class CommandControllerBase(
     protected UserCommandContext UserContext => currentUserRetriever.GetAuthenticatedCurrentUser().ToCommandContext();
 
     /// <summary>Confirms the command to the user, publishes it and answers 202 Accepted.</summary>
-    protected async Task<AcceptedResult> PublishAsync<TCommand>(TCommand command, EntityType entityType) where TCommand : IUserCommand
+    protected async Task<ActionResult> PublishAsync<TCommand>(TCommand command, EntityType entityType) where TCommand : IUserCommand
     {
         await sendNotificationCommandHandler.Execute(command.UserCommandContext.Id.ToString(), new NotificationDto
         {

@@ -25,14 +25,14 @@ public class TeamController(
 {
     [HttpPost]
     [Claim(ClaimTypes.TeamsManage)]
-    public Task<AcceptedResult> Post([FromBody] CreateTeamCommand command)
+    public Task<ActionResult> Post([FromBody] CreateTeamCommand command)
     {
         return PublishAsync(command with { UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Team);
     }
 
     [HttpPut("{id:guid}")]
     [Claim(ClaimTypes.TeamsManage)]
-    public Task<AcceptedResult> Put(Guid id, [FromBody] UpdateTeamCommand command)
+    public Task<ActionResult> Put(Guid id, [FromBody] UpdateTeamCommand command)
     {
         return PublishAsync(command with { Id = id, UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Team);
     }
@@ -40,7 +40,7 @@ public class TeamController(
     /// <summary>Deletes a team that owns no active projects; its memberships are removed.</summary>
     [HttpDelete("{id:guid}")]
     [Claim(ClaimTypes.TeamsManage)]
-    public Task<AcceptedResult> Delete(Guid id)
+    public Task<ActionResult> Delete(Guid id)
     {
         return PublishAsync(new DeleteTeamCommand(id) { UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Team);
     }
@@ -48,7 +48,7 @@ public class TeamController(
     /// <summary>Adds members (body: userIds); users who already are members are skipped.</summary>
     [HttpPost("{id:guid}/member")]
     [Claim(ClaimTypes.TeamsMembersManage)]
-    public Task<AcceptedResult> PostMembers(Guid id, [FromBody] AddTeamMembersCommand command)
+    public Task<ActionResult> PostMembers(Guid id, [FromBody] AddTeamMembersCommand command)
     {
         return PublishAsync(command with { TeamId = id, UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.TeamMember);
     }
@@ -56,7 +56,7 @@ public class TeamController(
     /// <summary>Removes a member; their tasks in the team's projects become unassigned.</summary>
     [HttpDelete("{id:guid}/member/{userId:guid}")]
     [Claim(ClaimTypes.TeamsMembersManage)]
-    public Task<AcceptedResult> DeleteMember(Guid id, Guid userId)
+    public Task<ActionResult> DeleteMember(Guid id, Guid userId)
     {
         return PublishAsync(new RemoveTeamMemberCommand(id, userId) { UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.TeamMember);
     }

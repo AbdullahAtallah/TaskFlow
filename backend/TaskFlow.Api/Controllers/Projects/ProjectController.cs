@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Api.Shared;
 using TaskFlow.Application.Commands.Projects.CreateProject;
 using TaskFlow.Application.Commands.Projects.DeleteProject;
-using TaskFlow.Application.Commands.Projects.UpdateProject;
+// using TaskFlow.Application.Commands.Projects.UpdateProject;
 using TaskFlow.Application.Interfaces;
 using TaskFlow.Domain.Constants;
 using TaskFlow.Domain.Enums;
@@ -24,22 +24,23 @@ public class ProjectController(
     /// <summary>Creates a project in a team inside the user's scope.</summary>
     [HttpPost]
     [Claim(ClaimTypes.ProjectsCreate)]
-    public Task<AcceptedResult> Post([FromBody] CreateProjectCommand command)
+    public Task<ActionResult> Post([FromBody] CreateProjectCommand command)
     {
         return PublishAsync(command with { UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Project);
     }
 
-    [HttpPut("{id:guid}")]
-    [Claim(ClaimTypes.ProjectsManage)]
-    public Task<AcceptedResult> Put(Guid id, [FromBody] UpdateProjectCommand command)
-    {
-        return PublishAsync(command with { Id = id, UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Project);
-    }
+    // Not used by the design: projects are not edited.
+    // [HttpPut("{id:guid}")]
+    // [Claim(ClaimTypes.ProjectsManage)]
+    // public Task<ActionResult> Put(Guid id, [FromBody] UpdateProjectCommand command)
+    // {
+    //     return PublishAsync(command with { Id = id, UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Project);
+    // }
 
     /// <summary>Soft-deletes the project and all of its tasks.</summary>
     [HttpDelete("{id:guid}")]
     [Claim(ClaimTypes.ProjectsManage)]
-    public Task<AcceptedResult> Delete(Guid id)
+    public Task<ActionResult> Delete(Guid id)
     {
         return PublishAsync(new DeleteProjectCommand(id) { UserCommandContext = UserContext, CorrelationId = Guid.NewGuid() }, EntityType.Project);
     }

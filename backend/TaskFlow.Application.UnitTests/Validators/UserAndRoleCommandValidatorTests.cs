@@ -139,11 +139,23 @@ public sealed class UserAndRoleCommandValidatorTests
     }
 
     [Fact]
-    public void UpdateRole_RequiresTheRoleIdAndTheRowVersion()
+    public void UpdateRole_RequiresTheRoleId()
     {
-        var result = new UpdateRoleCommandValidator().TestValidate(new UpdateRoleCommand(Guid.Empty, "Planner", null, false, [], [], []));
+        new UpdateRoleCommandValidator().TestValidate(new UpdateRoleCommand(Guid.Empty, [], []))
+            .ShouldHaveValidationErrorFor(command => command.Id);
+    }
 
-        result.ShouldHaveValidationErrorFor(command => command.Id);
-        result.ShouldHaveValidationErrorFor(command => command.RowVersion);
+    [Fact]
+    public void UpdateRole_AppliesThePermissionRules()
+    {
+        var validator = new UpdateRoleCommandValidator();
+
+        validator.TestValidate(new UpdateRoleCommand(Guid.NewGuid(), [PackageTypes.Tasks], [ClaimTypes.TasksBoardView]))
+            .ShouldNotHaveAnyValidationErrors();
+        validator.TestValidate(new UpdateRoleCommand(Guid.NewGuid(), [PackageTypes.Projects], [ClaimTypes.TasksCreate]))
+            .ShouldHaveValidationErrorFor("Claims[0]")
+            .WithErrorMessage("The claim 'Tasks.Create' requires the Tasks package.");
+        validator.TestValidate(new UpdateRoleCommand(Guid.NewGuid(), null!, null!))
+            .ShouldHaveValidationErrorFor(command => command.Packages);
     }
 }

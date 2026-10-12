@@ -12,8 +12,7 @@ public class SessionController(LogoutCommandHandler logoutCommandHandler, ICurre
 {
     /// <summary>Ends every session of the signed-in user: all their tokens are refused from now on.</summary>
     [HttpPost("logout")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<NoContentResult> Logout()
+    public async Task<ActionResult> Logout()
     {
         await logoutCommandHandler.Execute(new LogoutCommand(currentUserRetriever.GetAuthenticatedCurrentUser().Id));
 

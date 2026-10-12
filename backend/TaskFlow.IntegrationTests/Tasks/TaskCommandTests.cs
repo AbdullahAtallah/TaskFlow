@@ -144,29 +144,30 @@ public sealed class TaskCommandTests(TaskFlowFixture fixture) : IntegrationTestB
         (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().Be(_member.Id);
     }
 
-    [Fact]
-    public async Task ChangeStatus_UpdatesOnlyTheStatus()
-    {
-        var task = await Data.TaskAsync(_project, _member, "Task", TaskStatus.ToDo, TaskPriority.High, assignee: _member);
-
-        await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/status", new { status = "InProgress" });
-
-        var stored = (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!;
-        stored.Status.Should().Be(TaskStatus.InProgress);
-        stored.Priority.Should().Be(TaskPriority.High);
-        stored.AssigneeId.Should().Be(_member.Id);
-    }
-
-    [Fact]
-    public async Task ChangeStatus_WithoutAStatus_IsRefused_InsteadOfResettingTheTask()
-    {
-        var task = await Data.TaskAsync(_project, _member, "Task", TaskStatus.InProgress);
-
-        var misspelled = await SendAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/status", new { state = "Done" });
-
-        await misspelled.ShouldHaveStatusAsync(HttpStatusCode.BadRequest);
-        (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.Status.Should().Be(TaskStatus.InProgress);
-    }
+    // The status and assignee endpoints are commented out in TaskController: the task dialog saves both with PUT /api/task/{id}.
+    // [Fact]
+    // public async Task ChangeStatus_UpdatesOnlyTheStatus()
+    // {
+    //     var task = await Data.TaskAsync(_project, _member, "Task", TaskStatus.ToDo, TaskPriority.High, assignee: _member);
+    //
+    //     await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/status", new { status = "InProgress" });
+    //
+    //     var stored = (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!;
+    //     stored.Status.Should().Be(TaskStatus.InProgress);
+    //     stored.Priority.Should().Be(TaskPriority.High);
+    //     stored.AssigneeId.Should().Be(_member.Id);
+    // }
+    //
+    // [Fact]
+    // public async Task ChangeStatus_WithoutAStatus_IsRefused_InsteadOfResettingTheTask()
+    // {
+    //     var task = await Data.TaskAsync(_project, _member, "Task", TaskStatus.InProgress);
+    //
+    //     var misspelled = await SendAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/status", new { state = "Done" });
+    //
+    //     await misspelled.ShouldHaveStatusAsync(HttpStatusCode.BadRequest);
+    //     (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.Status.Should().Be(TaskStatus.InProgress);
+    // }
 
     [Fact]
     public async Task Create_WithoutStatusOrPriority_IsRefused()
@@ -177,28 +178,29 @@ public sealed class TaskCommandTests(TaskFlowFixture fixture) : IntegrationTestB
         (await Data.QueryAsync(dbContext => dbContext.Tasks.CountAsync())).Should().Be(0);
     }
 
-    [Fact]
-    public async Task Assign_AssignsATeamMember_AndUnassignsWithNull()
-    {
-        var task = await Data.TaskAsync(_project, _member);
-
-        await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee", new { assigneeId = _colleague.Id });
-        (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().Be(_colleague.Id);
-
-        await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee", new { assigneeId = (Guid?)null });
-        (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task Assign_ToSomeoneOutsideTheTeam_IsRefused()
-    {
-        var task = await Data.TaskAsync(_project, _member);
-
-        var notification = await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee",
-            new { assigneeId = (await Data.UserAsync()).Id });
-
-        notification.ShouldBeError(ErrorMessages.AssigneeMustBeTeamMember);
-    }
+    // See above: PUT /api/task/{id}/assignee is commented out; Create_ and Update_ cover the assignee rules.
+    // [Fact]
+    // public async Task Assign_AssignsATeamMember_AndUnassignsWithNull()
+    // {
+    //     var task = await Data.TaskAsync(_project, _member);
+    //
+    //     await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee", new { assigneeId = _colleague.Id });
+    //     (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().Be(_colleague.Id);
+    //
+    //     await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee", new { assigneeId = (Guid?)null });
+    //     (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().BeNull();
+    // }
+    //
+    // [Fact]
+    // public async Task Assign_ToSomeoneOutsideTheTeam_IsRefused()
+    // {
+    //     var task = await Data.TaskAsync(_project, _member);
+    //
+    //     var notification = await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/assignee",
+    //         new { assigneeId = (await Data.UserAsync()).Id });
+    //
+    //     notification.ShouldBeError(ErrorMessages.AssigneeMustBeTeamMember);
+    // }
 
     [Fact]
     public async Task Delete_SoftDeletesTheTask()
@@ -218,7 +220,8 @@ public sealed class TaskCommandTests(TaskFlowFixture fixture) : IntegrationTestB
         var task = await Data.TaskAsync(_project, _member, "Deleted task");
         await SendCommandExpectingDoneAsync(_member.UserName, HttpMethod.Delete, $"/api/task/{task.Id}");
 
-        var notification = await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}/status", new { status = "Done" });
+        var notification = await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{task.Id}",
+            new { title = "Deleted task", status = "Done", priority = "Low", rowVersion = task.RowVersion });
 
         notification.ShouldBeError(ErrorMessages.TaskNotFound);
         (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.Status.Should().Be(TaskStatus.ToDo);
@@ -232,10 +235,10 @@ public sealed class TaskCommandTests(TaskFlowFixture fixture) : IntegrationTestB
 
         (await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{otherTask.Id}",
             new { title = "Hijacked", status = "Done", priority = "Low", rowVersion = otherTask.RowVersion })).ShouldBeError(ErrorMessages.TaskNotFound);
-        (await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{otherTask.Id}/status", new { status = "Done" }))
-            .ShouldBeError(ErrorMessages.TaskNotFound);
-        (await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{otherTask.Id}/assignee", new { assigneeId = (Guid?)null }))
-            .ShouldBeError(ErrorMessages.TaskNotFound);
+        // (await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{otherTask.Id}/status", new { status = "Done" }))
+        //     .ShouldBeError(ErrorMessages.TaskNotFound);
+        // (await SendCommandAsync(_member.UserName, HttpMethod.Put, $"/api/task/{otherTask.Id}/assignee", new { assigneeId = (Guid?)null }))
+        //     .ShouldBeError(ErrorMessages.TaskNotFound);
         (await SendCommandAsync(_member.UserName, HttpMethod.Delete, $"/api/task/{otherTask.Id}"))
             .ShouldBeError(ErrorMessages.TaskNotFound);
 

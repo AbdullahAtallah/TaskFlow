@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Application.Common.Filtering;
 using TaskFlow.Application.Interfaces.DataReaders;
 using TaskFlow.Application.Queries.Teams;
 using TaskFlow.Domain.Constants;
@@ -14,19 +13,19 @@ public class TeamQueryController(ITeamDataReader teamDataReader) : ControllerBas
 {
     /// <summary>Paged list of the visible teams: the user's teams, or every team with Teams.View.All.</summary>
     [HttpGet]
-    public async Task<ActionResult<FilteringResult<TeamRowDto>>> Get([FromQuery] GetTeamsQuery filter)
+    public async Task<ActionResult> Get([FromQuery] GetTeamsQuery filter)
     {
         return Ok(await teamDataReader.GetGridAsync(filter));
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TeamDetailDto>> Get(Guid id)
+    public async Task<ActionResult> Get(Guid id)
     {
         return Ok(await teamDataReader.GetByIdAsync(id));
     }
 
     [HttpGet("{id:guid}/member")]
-    public async Task<ActionResult<IReadOnlyList<TeamMemberDto>>> GetMembers(Guid id)
+    public async Task<ActionResult> GetMembers(Guid id)
     {
         return Ok(await teamDataReader.GetMembersAsync(id));
     }

@@ -51,31 +51,32 @@ public sealed class ProjectCommandTests(TaskFlowFixture fixture) : IntegrationTe
         await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Post, "/api/project", new { teamId = team.Id, name = "Budget Q4" });
     }
 
+    // Editing a project is commented out in ProjectController: the design has no way to edit one.
+    // [Fact]
+    // public async Task Update_ChangesNameAndDescription()
+    // {
+    //     var member = await Data.UserAsync();
+    //     var project = await Data.ProjectAsync(await Data.TeamAsync([member]), "Website", "Old");
+    //
+    //     await SendCommandExpectingDoneAsync(member.UserName, HttpMethod.Put, $"/api/project/{project.Id}",
+    //         new { name = "Website relaunch", description = (string?)null, rowVersion = project.RowVersion });
+    //
+    //     var stored = (await Data.FindIncludingDeletedAsync<ProjectEntity>(project.Id))!;
+    //     stored.Name.Should().Be("Website relaunch");
+    //     stored.Description.Should().BeNull();
+    //     stored.DateTimeModified.Should().NotBeNull();
+    // }
+
     [Fact]
-    public async Task Update_ChangesNameAndDescription()
-    {
-        var member = await Data.UserAsync();
-        var project = await Data.ProjectAsync(await Data.TeamAsync([member]), "Website", "Old");
-
-        await SendCommandExpectingDoneAsync(member.UserName, HttpMethod.Put, $"/api/project/{project.Id}",
-            new { name = "Website relaunch", description = (string?)null, rowVersion = project.RowVersion });
-
-        var stored = (await Data.FindIncludingDeletedAsync<ProjectEntity>(project.Id))!;
-        stored.Name.Should().Be("Website relaunch");
-        stored.Description.Should().BeNull();
-        stored.DateTimeModified.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Update_AndDelete_OfAnotherTeamsProject_AreNotFound_AndChangeNothing()
+    public async Task Delete_OfAnotherTeamsProject_IsNotFound_AndChangesNothing()
     {
         var memberOfTeamA = await Data.UserAsync();
         await Data.TeamAsync([memberOfTeamA]);
         var projectOfTeamB = await Data.ProjectAsync(await Data.TeamAsync(), "Team B plans");
 
-        (await SendCommandAsync(memberOfTeamA.UserName, HttpMethod.Put, $"/api/project/{projectOfTeamB.Id}",
-                new { name = "Hijacked", rowVersion = projectOfTeamB.RowVersion }))
-            .ShouldBeError(ErrorMessages.ProjectNotFound);
+        // (await SendCommandAsync(memberOfTeamA.UserName, HttpMethod.Put, $"/api/project/{projectOfTeamB.Id}",
+        //         new { name = "Hijacked", rowVersion = projectOfTeamB.RowVersion }))
+        //     .ShouldBeError(ErrorMessages.ProjectNotFound);
         (await SendCommandAsync(memberOfTeamA.UserName, HttpMethod.Delete, $"/api/project/{projectOfTeamB.Id}"))
             .ShouldBeError(ErrorMessages.ProjectNotFound);
 

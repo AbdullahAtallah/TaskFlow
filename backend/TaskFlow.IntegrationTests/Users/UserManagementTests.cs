@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskFlow.Application.Common.Filtering;
 using TaskFlow.Application.Queries.Users;
 using TaskFlow.Domain.Constants;
-using TaskFlow.Domain.Entities.Tasks;
+// using TaskFlow.Domain.Entities.Tasks;
 using TaskFlow.Domain.Entities.Users;
 using TaskFlow.Domain.Enums;
 using TaskFlow.IntegrationTests.Authentication;
@@ -64,18 +64,19 @@ public sealed class UserManagementTests(TaskFlowFixture fixture) : IntegrationTe
         page.Data.Select(user => user.DisplayName).Should().Equal("Bram");
     }
 
-    [Fact]
-    public async Task Details_ReturnRolesAndTeams_AndNotFoundForAnUnknownUser()
-    {
-        var user = await Data.UserInRolesAsync([DefaultRoleBundles.UserRoleName, DefaultRoleBundles.ReadOnlyUserRoleName]);
-        await Data.TeamAsync([user], name: "Marketing");
-
-        var details = await GetAsync<UserDetailDto>(AdminEmail, $"/api/user/{user.Id}");
-
-        details.Roles.Select(role => role.Name).Should().Equal(DefaultRoleBundles.ReadOnlyUserRoleName, DefaultRoleBundles.UserRoleName);
-        details.Teams.Select(team => team.Name).Should().Equal("Marketing");
-        await (await SendAsync(AdminEmail, HttpMethod.Get, $"/api/user/{Guid.NewGuid()}")).ShouldHaveStatusAsync(HttpStatusCode.NotFound);
-    }
+    // GET /api/user/{id} is commented out in UserQueryController: the design has no user details page.
+    // [Fact]
+    // public async Task Details_ReturnRolesAndTeams_AndNotFoundForAnUnknownUser()
+    // {
+    //     var user = await Data.UserInRolesAsync([DefaultRoleBundles.UserRoleName, DefaultRoleBundles.ReadOnlyUserRoleName]);
+    //     await Data.TeamAsync([user], name: "Marketing");
+    //
+    //     var details = await GetAsync<UserDetailDto>(AdminEmail, $"/api/user/{user.Id}");
+    //
+    //     details.Roles.Select(role => role.Name).Should().Equal(DefaultRoleBundles.ReadOnlyUserRoleName, DefaultRoleBundles.UserRoleName);
+    //     details.Teams.Select(team => team.Name).Should().Equal("Marketing");
+    //     await (await SendAsync(AdminEmail, HttpMethod.Get, $"/api/user/{Guid.NewGuid()}")).ShouldHaveStatusAsync(HttpStatusCode.NotFound);
+    // }
 
     [Fact]
     public async Task Create_StoresTheUser_WhoThenSignsInWithTheChosenRole()
@@ -175,71 +176,72 @@ public sealed class UserManagementTests(TaskFlowFixture fixture) : IntegrationTe
         notification.ShouldBeError(ErrorMessages.CannotDeactivateOwnAccount);
     }
 
-    [Fact]
-    public async Task UpdateRoles_ReplacesTheRoles_AndAppliesThemOnTheNextRequest()
-    {
-        var user = await Data.UserAsync();
-        var adminRole = await Data.RoleNamedAsync(DefaultRoleBundles.AdminRoleName);
-        await (await SendAsync(user.UserName, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.Forbidden);
-
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/user/{user.Id}/permissions", new { userId = Guid.NewGuid(), roleIds = new[] { adminRole.Id } });
-
-        await (await SendAsync(user.UserName, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.OK);
-        var roleNames = await Data.QueryAsync(dbContext => dbContext.UserRoles.Where(userRole => userRole.UserId == user.Id).Select(userRole => userRole.Role!.Name).ToListAsync());
-        roleNames.Should().Equal(DefaultRoleBundles.AdminRoleName);
-    }
-
-    [Fact]
-    public async Task UpdateRoles_RemovingYourOwnManagementAccess_IsRefused()
-    {
-        var admin = await Data.AdminAsync();
-        var userRole = await Data.RoleNamedAsync(DefaultRoleBundles.UserRoleName);
-
-        var notification = await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/user/{admin.Id}/permissions", new { roleIds = new[] { userRole.Id } });
-
-        notification.ShouldBeError(ErrorMessages.CannotRemoveOwnManagementAccess);
-        await (await SendAsync(AdminEmail, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.OK);
-    }
-
-    [Fact]
-    public async Task Delete_SoftDeletesTheUser_AndRemovesRolesMembershipsAndAssignments()
-    {
-        var admin = await Data.AdminAsync();
-        var user = await Data.UserAsync(displayName: "Leaving");
-        var team = await Data.TeamAsync([user]);
-        var task = await Data.TaskAsync(await Data.ProjectAsync(team), admin, assignee: user);
-        var client = await ClientForAsync(user.UserName);
-        await (await client.GetAsync("/api/user/current")).ShouldHaveStatusAsync(HttpStatusCode.OK);
-
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{user.Id}");
-
-        (await Data.FindIncludingDeletedAsync<UserEntity>(user.Id))!.DateTimeDeleted.Should().NotBeNull();
-        (await Data.QueryAsync(dbContext => dbContext.UserRoles.AnyAsync(userRole => userRole.UserId == user.Id))).Should().BeFalse();
-        (await Data.QueryAsync(dbContext => dbContext.TeamMembers.AnyAsync(member => member.UserId == user.Id))).Should().BeFalse();
-        (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().BeNull();
-        (await NamesAsync("/api/user")).Should().NotContain("Leaving");
-        await (await client.GetAsync("/api/user/current")).ShouldHaveStatusAsync(HttpStatusCode.Unauthorized);
-
-        var registerAgain = await Factory.CreateClient().PostAsJsonAsync("/api/auth/register",
-            new { email = user.UserName, displayName = "Back again", password = InitialPassword }, TestJson.Options);
-        await registerAgain.ShouldHaveStatusAsync(HttpStatusCode.Created);
-        (await UserByEmailAsync(user.UserName)).Id.Should().NotBe(user.Id, "the e-mail address of a deleted user can start over as a new account");
-    }
-
-    [Fact]
-    public async Task Delete_WorksForAUserWhoCreatedATaskAssignedToThemselves()
-    {
-        var user = await Data.UserAsync(displayName: "Self-assigner");
-        var task = await Data.TaskAsync(await Data.ProjectAsync(await Data.TeamAsync([user])), user, assignee: user);
-
-        await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{user.Id}");
-
-        (await Data.FindIncludingDeletedAsync<UserEntity>(user.Id))!.DateTimeDeleted.Should().NotBeNull();
-        var storedTask = (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!;
-        storedTask.AssigneeId.Should().BeNull();
-        storedTask.CreatedById.Should().Be(user.Id);
-        storedTask.DateTimeDeleted.Should().BeNull();
-    }
+    // Changing a user's roles and deleting a user are commented out in UserController: the design has neither.
+    // [Fact]
+    // public async Task UpdateRoles_ReplacesTheRoles_AndAppliesThemOnTheNextRequest()
+    // {
+    //     var user = await Data.UserAsync();
+    //     var adminRole = await Data.RoleNamedAsync(DefaultRoleBundles.AdminRoleName);
+    //     await (await SendAsync(user.UserName, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.Forbidden);
+    //
+    //     await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Put, $"/api/user/{user.Id}/permissions", new { userId = Guid.NewGuid(), roleIds = new[] { adminRole.Id } });
+    //
+    //     await (await SendAsync(user.UserName, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.OK);
+    //     var roleNames = await Data.QueryAsync(dbContext => dbContext.UserRoles.Where(userRole => userRole.UserId == user.Id).Select(userRole => userRole.Role!.Name).ToListAsync());
+    //     roleNames.Should().Equal(DefaultRoleBundles.AdminRoleName);
+    // }
+    //
+    // [Fact]
+    // public async Task UpdateRoles_RemovingYourOwnManagementAccess_IsRefused()
+    // {
+    //     var admin = await Data.AdminAsync();
+    //     var userRole = await Data.RoleNamedAsync(DefaultRoleBundles.UserRoleName);
+    //
+    //     var notification = await SendCommandAsync(AdminEmail, HttpMethod.Put, $"/api/user/{admin.Id}/permissions", new { roleIds = new[] { userRole.Id } });
+    //
+    //     notification.ShouldBeError(ErrorMessages.CannotRemoveOwnManagementAccess);
+    //     await (await SendAsync(AdminEmail, HttpMethod.Get, "/api/user")).ShouldHaveStatusAsync(HttpStatusCode.OK);
+    // }
+    //
+    // [Fact]
+    // public async Task Delete_SoftDeletesTheUser_AndRemovesRolesMembershipsAndAssignments()
+    // {
+    //     var admin = await Data.AdminAsync();
+    //     var user = await Data.UserAsync(displayName: "Leaving");
+    //     var team = await Data.TeamAsync([user]);
+    //     var task = await Data.TaskAsync(await Data.ProjectAsync(team), admin, assignee: user);
+    //     var client = await ClientForAsync(user.UserName);
+    //     await (await client.GetAsync("/api/user/current")).ShouldHaveStatusAsync(HttpStatusCode.OK);
+    //
+    //     await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{user.Id}");
+    //
+    //     (await Data.FindIncludingDeletedAsync<UserEntity>(user.Id))!.DateTimeDeleted.Should().NotBeNull();
+    //     (await Data.QueryAsync(dbContext => dbContext.UserRoles.AnyAsync(userRole => userRole.UserId == user.Id))).Should().BeFalse();
+    //     (await Data.QueryAsync(dbContext => dbContext.TeamMembers.AnyAsync(member => member.UserId == user.Id))).Should().BeFalse();
+    //     (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!.AssigneeId.Should().BeNull();
+    //     (await NamesAsync("/api/user")).Should().NotContain("Leaving");
+    //     await (await client.GetAsync("/api/user/current")).ShouldHaveStatusAsync(HttpStatusCode.Unauthorized);
+    //
+    //     var registerAgain = await Factory.CreateClient().PostAsJsonAsync("/api/auth/register",
+    //         new { email = user.UserName, displayName = "Back again", password = InitialPassword }, TestJson.Options);
+    //     await registerAgain.ShouldHaveStatusAsync(HttpStatusCode.Created);
+    //     (await UserByEmailAsync(user.UserName)).Id.Should().NotBe(user.Id, "the e-mail address of a deleted user can start over as a new account");
+    // }
+    //
+    // [Fact]
+    // public async Task Delete_WorksForAUserWhoCreatedATaskAssignedToThemselves()
+    // {
+    //     var user = await Data.UserAsync(displayName: "Self-assigner");
+    //     var task = await Data.TaskAsync(await Data.ProjectAsync(await Data.TeamAsync([user])), user, assignee: user);
+    //
+    //     await SendCommandExpectingDoneAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{user.Id}");
+    //
+    //     (await Data.FindIncludingDeletedAsync<UserEntity>(user.Id))!.DateTimeDeleted.Should().NotBeNull();
+    //     var storedTask = (await Data.FindIncludingDeletedAsync<TaskEntity>(task.Id))!;
+    //     storedTask.AssigneeId.Should().BeNull();
+    //     storedTask.CreatedById.Should().Be(user.Id);
+    //     storedTask.DateTimeDeleted.Should().BeNull();
+    // }
 
     [Fact]
     public async Task Update_WithoutIsActive_IsRefused_InsteadOfDeactivatingTheUser()
@@ -254,13 +256,14 @@ public sealed class UserManagementTests(TaskFlowFixture fixture) : IntegrationTe
         stored.DisplayName.Should().Be("Still here");
     }
 
-    [Fact]
-    public async Task Deleting_YourOwnAccount_IsRefused()
-    {
-        var admin = await Data.AdminAsync();
-
-        (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{admin.Id}")).ShouldBeError(ErrorMessages.CannotDeleteOwnAccount);
-    }
+    // Deleting a user is commented out in UserController.
+    // [Fact]
+    // public async Task Deleting_YourOwnAccount_IsRefused()
+    // {
+    //     var admin = await Data.AdminAsync();
+    //
+    //     (await SendCommandAsync(AdminEmail, HttpMethod.Delete, $"/api/user/{admin.Id}")).ShouldBeError(ErrorMessages.CannotDeleteOwnAccount);
+    // }
 
     private async Task<List<string>> NamesAsync(string url)
     {

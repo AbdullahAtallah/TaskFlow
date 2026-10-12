@@ -1,11 +1,9 @@
 namespace TaskFlow.Application.Commands.Roles.Common;
 
-/// <summary>The fields the role wizard and the role details page edit; shared by the create and update commands.</summary>
-public interface IRoleFieldsCommand
+/// <summary>All the fields of a new role: its name, description, default flag and permissions.</summary>
+public interface IRoleFieldsCommand : IRolePermissionsCommand
 {
     string Name { get; }
     string? Description { get; }
     bool IsDefault { get; }
-    List<string> Packages { get; }
-    List<string> Claims { get; }
 }

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
-using TaskFlow.Api.Swagger;
 
 namespace TaskFlow.Api.Configurations;
 
@@ -11,23 +10,14 @@ public static class SwaggerConfiguration
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(setup =>
         {
-            setup.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "TaskFlow API",
-                Version = "v1",
-                Description = "Sign in with POST /api/auth/login (or register), click Authorize and paste the accessToken; " +
-                              "every other endpoint needs it. Most write endpoints answer 202 Accepted; the result " +
-                              "arrives as a SignalR \"ReceiveNotification\" message on /notifications."
-            });
-
-            var bearerScheme = new OpenApiSecurityScheme
+            var jwtSecurityScheme = new OpenApiSecurityScheme
             {
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Name = "Authorization",
+                Name = "JWT Authentication",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
-                Description = "Paste only the accessToken from /api/auth/login, without \"Bearer\".",
+                Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
                 Reference = new OpenApiReference
                 {
                     Id = JwtBearerDefaults.AuthenticationScheme,
@@ -35,10 +25,13 @@ public static class SwaggerConfiguration
                 }
             };
 
-            setup.AddSecurityDefinition(bearerScheme.Reference.Id, bearerScheme);
-            setup.AddSecurityRequirement(new OpenApiSecurityRequirement { { bearerScheme, Array.Empty<string>() } });
+            setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+            setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                { jwtSecurityScheme, Array.Empty<string>() }
+            });
 
-            setup.SchemaFilter<HideUserCommandMetadataSchemaFilter>();
+            setup.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskFlow.Api", Version = "v1" });
         });
 
         return services;

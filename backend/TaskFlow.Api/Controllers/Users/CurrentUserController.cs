@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Application.Identity;
 using TaskFlow.Application.Interfaces.DataReaders;
 using TaskFlow.Application.Queries.Users;
 using TaskFlow.Domain.Constants;
@@ -17,7 +16,7 @@ public class CurrentUserController(
 {
     /// <summary>The signed-in user with their roles, packages, features and claims: what the frontend shows and hides.</summary>
     [HttpGet("current")]
-    public ActionResult<CurrentUser> GetCurrent()
+    public ActionResult GetCurrent()
     {
         return Ok(currentUserRetriever.GetAuthenticatedCurrentUser());
     }
@@ -25,7 +24,7 @@ public class CurrentUserController(
     /// <summary>Active users for the member picker and the assignee picker (?teamId= for the members of a team).</summary>
     [HttpGet("select-list")]
     [Claim(ClaimTypes.TeamsManage, ClaimTypes.TeamsMembersManage, ClaimTypes.TasksAssign)]
-    public async Task<ActionResult<IReadOnlyList<UserSelectItemDto>>> GetSelectList([FromQuery] GetUserSelectListQuery filter)
+    public async Task<ActionResult> GetSelectList([FromQuery] GetUserSelectListQuery filter)
     {
         return Ok(await userDataReader.GetSelectListAsync(filter));
     }

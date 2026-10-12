@@ -153,8 +153,8 @@ This is the order in which a frontend connects to the API. The CORS policy alrea
    outcome there: see [Reads and writes](#reads-and-writes). The connection closes when its token expires; open it
    again after the next sign-in.
 
-5. **Send the row version back when editing.** Every record comes with a `rowVersion`; an edit form sends it back unchanged
-   in its `PUT`. See [Editing: row versions](#editing-row-versions).
+5. **Send the row version back when editing.** Teams, tasks and users come with a `rowVersion`; an edit form sends it back
+   unchanged in its `PUT`. See [Editing: row versions](#editing-row-versions).
 
 6. **Sign out** with `POST /api/auth/logout` (answers `204`), then forget the token. This ends every session of the user,
    on every device.
@@ -167,10 +167,10 @@ This is the order in which a frontend connects to the API. The CORS policy alrea
 | Add and remove team members                              | `Teams.Members.Manage`                             |
 | Projects menu and project details                        | package `Projects`                                 |
 | New project                                              | `Projects.Create`                                  |
-| Edit project, delete project                             | `Projects.Manage`                                  |
+| Delete project                                           | `Projects.Manage`                                  |
 | Tasks menu, my tasks, task counts                        | package `Tasks`                                    |
 | New task                                                 | `Tasks.Create`                                     |
-| Edit task, change its status, delete task                | `Tasks.Manage`                                     |
+| Edit task (also its status), delete task                 | `Tasks.Manage`                                     |
 | Choose or change an assignee                             | `Tasks.Assign`                                     |
 | The user picker (team members, assignees)                | `Teams.Manage`, `Teams.Members.Manage` or `Tasks.Assign` |
 | Task board                                               | feature `Tasks.Board` and `Tasks.Board.View`       |
@@ -196,15 +196,17 @@ This is the order in which a frontend connects to the API. The CORS policy alrea
 - An unknown address and a wrong password get the same answer and take as long, so login does not reveal which addresses
   have an account. Registering does: an address in use answers 400.
 
-Administrators manage accounts under `/api/user`:
+Administrators manage accounts under `/api/user`, as far as the design does:
 
-- `POST /api/user` creates a user with an initial password and roles, and answers `201` with the new user.
-- `PUT /api/user/{id}/password` sets a new password, for example when someone forgot theirs, and ends their sessions.
+- `POST /api/user` creates a user with an initial password and a role, and answers `201` with the new user.
+- `PUT /api/user/{id}/password` sets a new password, for example when someone forgot theirs, and ends their sessions. The
+  design has no screen for it: an administrator calls it from Swagger.
 - Deactivating a user (`isActive: false`) refuses them at once: `401 {"error":"account_revoked"}` on the next request, and no
   new notification connection; one that is already open closes when its token expires.
-- Deleting a user is a soft delete. It removes their roles and team memberships, unassigns their tasks, ends their sessions
-  and frees their e-mail address, which can then register again as a new account. To keep someone out, deactivate them.
-- Nobody can deactivate or delete themselves, or take away their own access to user management.
+- Nobody can deactivate themselves, or take away their own access to user management.
+
+Changing a user's roles, reading one user and deleting a user are commented out in `UserController` and
+`UserQueryController`, because the design has no screen for them. See [Endpoints](#endpoints).
 
 ### Permissions
 
@@ -221,7 +223,8 @@ A role grants **packages** (modules) and **claims** (single permissions). A user
 The **Tasks.Board** feature belongs to the Tasks package. Setting `IsEnabled` to false in the `Features` table switches the
 board off for everyone, from the next request.
 
-The seed migration creates three default roles, with the same ids in every database. They cannot be renamed or deleted.
+The roles are seeded, as in FAMAS: the seed migration creates three roles, with the same ids in every database. The API
+does not create, rename or delete roles; it only changes which packages and claims a role grants (`PUT /api/role/{id}`).
 
 | Role                         | Packages              | Claims                                                                                                   |
 |------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------|
@@ -229,11 +232,9 @@ The seed migration creates three default roles, with the same ids in every datab
 | User (default for new users) | all except Management | `Projects.Create`, `Projects.Manage`, `Tasks.Create`, `Tasks.Manage`, `Tasks.Assign`, `Tasks.Board.View` |
 | ReadOnlyUser                 | all except Management | `Teams.View.All`, `Projects.View.All`, `Tasks.View.All`, `Tasks.Board.View`                              |
 
-Exactly one role is the default for new users; marking another role as default moves the flag. Because everyone who
-registers gets that role, it can never grant the Management package. A role that is still assigned to users cannot be
-deleted. Should two administrators change roles at the very same moment and leave two
-default roles, or none, a new user gets the first default role by name, or else the built-in User role; the next start
-of the API restores exactly one default.
+User is the role for new users. Because everyone who registers gets it, it can never grant the Management package.
+`PUT /api/role/{id}` takes `{ packages, claims }`, always keeps General, and needs no row version: the role details page
+saves every switch on its own, and the latest change wins.
 
 Each controller requires its package (`[Authorization]`) and each action its claim (`[Claim]`). A missing package, feature or
 claim answers 403, before the request body is even validated. The user and their permissions are read from the database on
@@ -264,7 +265,7 @@ who share a team with them.
 
 Reads answer `200` with the data.
 
-Most writes (POST, PUT and DELETE on roles, teams, projects and tasks, and the user updates without a password) are
+Most writes (POST, PUT and DELETE on roles, teams, projects and tasks, and the user update) are
 commands. The API answers **202 Accepted** without a body, and a Wolverine handler processes the command in the
 background. The outcome arrives over SignalR:
 
@@ -294,21 +295,21 @@ background. The outcome arrives over SignalR:
 A `Done` is the signal to reload the affected data. A command that fails changes nothing. Rule violations in a request body
 (an empty name, a duplicate name, an assignee outside the team) arrive as an `Error` notification, because the handler
 validates the command. A body answers 400 only when it cannot be read (malformed JSON, a wrong type, an unknown enum
-name) or leaves out a field without a safe default: `isActive`, `status`, `priority`, `isDefault` or `rowVersion`.
+name) or leaves out a field without a safe default: `isActive`, `status`, `priority` or `rowVersion`.
 
-Register, login, logout, creating a user and setting a password answer right away instead, with `201`, `200` or `204`, or
-with the error: `400` with the messages per field, `401`, or `404`.
+Register, login, logout, creating a user and setting a password answer right away instead, with `201`, `200` or `204`,
+or with the error: `400` with the messages per field, `401`, or `404`.
 
 ### Editing: row versions
 
 Every team, project, task, user and role carries a `rowVersion` (a short Base64 string) in the grid rows and the details.
+The edits that take it back are `PUT /api/team/{id}`, `PUT /api/task/{id}` and `PUT /api/user/{id}`.
 SQL Server gives the record a new version on every save. An edit form sends the version it showed back unchanged in its
 `PUT` body. When someone else saved the record in the meantime, the save is refused with the `Error` notification
 "Someone else changed this in the meantime. Reload it and try again." and nothing changes; reload the record and edit again.
 A `PUT` without `rowVersion` answers 400.
 
-Changing a role's packages or claims gives the role a new version too. The commands that change one thing — a task's
-status or assignee, team members, a user's roles, a password — and deletes do not take a version: the latest one wins.
+Changing a role's packages and claims, team members, and deletes do not take a version: the latest one wins.
 
 ### Grids: search, filters, sorting and paging
 
@@ -381,7 +382,7 @@ User ──< TeamMember >── Team ──< Project ──< Task (assignee → 
 
 ## Endpoints
 
-All routes start with `/api`. Swagger shows every request and response schema.
+All routes start with `/api`. Swagger shows every request body; the responses are described in this README.
 
 | Method          | Route                                                             | Requires                                                       |
 |-----------------|-------------------------------------------------------------------|----------------------------------------------------------------|
@@ -389,15 +390,12 @@ All routes start with `/api`. Swagger shows every request and response schema.
 | POST            | `/auth/logout`                                                    | a signed-in user                                               |
 | GET             | `/user/current`                                                   | a signed-in user                                               |
 | GET             | `/user/select-list`                                               | `Teams.Manage`, `Teams.Members.Manage` or `Tasks.Assign`       |
-| GET             | `/user`, `/user/{id}`                                             | Management                                                     |
+| GET             | `/user`                                                           | Management                                                     |
 | POST            | `/user`                                                           | Management (with an initial password)                          |
 | PUT             | `/user/{id}`                                                      | Management (display name, active)                              |
-| PUT             | `/user/{id}/password`                                             | Management                                                     |
-| PUT             | `/user/{id}/permissions`                                          | Management (the user's roles)                                  |
-| DELETE          | `/user/{id}`                                                      | Management                                                     |
+| PUT             | `/user/{id}/password`                                             | Management (no screen: use Swagger)                            |
 | GET             | `/role`, `/role/{id}`, `/role/{id}/user`                          | Management                                                     |
-| POST            | `/role`                                                           | Management                                                     |
-| PUT, DELETE     | `/role/{id}`                                                      | Management                                                     |
+| PUT             | `/role/{id}`                                                      | Management (the role's packages and claims)                    |
 | GET             | `/team`, `/team/{id}`, `/team/{id}/member`                        | Teams                                                          |
 | POST            | `/team`                                                           | Teams + `Teams.Manage`                                         |
 | PUT, DELETE     | `/team/{id}`                                                      | Teams + `Teams.Manage`                                         |
@@ -405,15 +403,28 @@ All routes start with `/api`. Swagger shows every request and response schema.
 | DELETE          | `/team/{id}/member/{userId}`                                      | Teams + `Teams.Members.Manage`                                 |
 | GET             | `/project`, `/project/{id}`, `/project/counts-per-team`           | Projects                                                       |
 | POST            | `/project`                                                        | Projects + `Projects.Create`                                   |
-| PUT, DELETE     | `/project/{id}`                                                   | Projects + `Projects.Manage`                                   |
+| DELETE          | `/project/{id}`                                                   | Projects + `Projects.Manage`                                   |
 | GET             | `/task`, `/task/{id}`, `/task/my-tasks`, `/task/status-counts`    | Tasks                                                          |
 | POST            | `/task`                                                           | Tasks + `Tasks.Create`                                         |
-| PUT             | `/task/{id}`, `/task/{id}/status`                                 | Tasks + `Tasks.Manage`                                         |
-| PUT             | `/task/{id}/assignee`                                             | Tasks + `Tasks.Assign`                                         |
+| PUT             | `/task/{id}`                                                      | Tasks + `Tasks.Manage`; changing the assignee also `Tasks.Assign` |
 | DELETE          | `/task/{id}`                                                      | Tasks + `Tasks.Manage`                                         |
 | GET             | `/task/board?projectId=`                                          | Tasks + the Tasks.Board feature + `Tasks.Board.View`           |
 
 `/task/status-counts` and `/project/counts-per-team` feed the dashboard; both count only what you can see.
+
+The API offers what the design (`Task Flow.html`) uses. These endpoints are commented out in their controllers, with
+their tests, and come back by removing the `//`:
+
+| Method | Route                     | What it did                                     |
+|--------|---------------------------|-------------------------------------------------|
+| GET    | `/user/{id}`              | One user with roles and teams                   |
+| PUT    | `/user/{id}/permissions`  | Replace a user's roles                          |
+| DELETE | `/user/{id}`              | Soft-delete a user                              |
+| POST   | `/role`                   | Create a role                                   |
+| DELETE | `/role/{id}`              | Delete a role                                   |
+| PUT    | `/project/{id}`           | Edit a project                                  |
+| PUT    | `/task/{id}/status`       | Change only a task's status                     |
+| PUT    | `/task/{id}/assignee`     | Change only a task's assignee                   |
 
 ## Development notes
 
@@ -437,9 +448,11 @@ All routes start with `/api`. Swagger shows every request and response schema.
 
 ## Known limitations
 
-- There are no refresh tokens, e-mail verification or self-service password reset: after 8 hours the user signs in again,
-  and an administrator sets a new password for someone who forgot theirs.
+- There are no refresh tokens, e-mail verification or self-service password reset: after 8 hours the user signs in
+  again, and an administrator sets a new password for someone who forgot theirs, in Swagger.
 - Logging out ends every session of that user, on all their devices at once.
+- Two role changes handled at the same moment can conflict; the second then fails with an Error notification. The
+  frontend waits for the Done of one switch before it sends the next.
 - Both sign-in limits are counted in the memory of each API instance. The limit per address also lets anyone lock an
   address out of signing in for 15 minutes by failing on purpose.
 - A notification connection that is already open stays open until its token expires, even after a logout, a new
