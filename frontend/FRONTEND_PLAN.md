@@ -29,8 +29,10 @@ the design wins.
   **Test it** is ticked.
 - Many pages already exist with static data. In those phases you replace the static data with API calls. You do not
   rebuild the page.
-- Test the API in Swagger (`https://localhost:7080/swagger`) before you connect a page to it. Sign in with
+- Test the API in Swagger (`http://localhost:5080/swagger`) before you connect a page to it. Sign in with
   `POST /api/auth/login`, click **Authorize** and paste the `accessToken`.
+- New to running the backend, to Swagger or to tokens? Read
+  [backend/GETTING_STARTED.md](../backend/GETTING_STARTED.md) first.
 
 | #  | Phase                          | Screens                         | Why at this point                                       |
 |----|--------------------------------|---------------------------------|---------------------------------------------------------|

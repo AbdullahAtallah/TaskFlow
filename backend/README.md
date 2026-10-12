@@ -21,6 +21,8 @@ The Domain, Application and Infrastructure project files fail the build when a r
 
 ## Getting started
 
+New to the backend, Swagger or JWT? Start with [GETTING_STARTED.md](GETTING_STARTED.md), a short step-by-step guide.
+
 ### Prerequisites
 
 - .NET SDK 10.0.401 or a later 10.0.4xx patch (pinned in `global.json`)
