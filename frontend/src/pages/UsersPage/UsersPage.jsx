@@ -2,6 +2,7 @@ import { Button } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import UsersTable from "../../components/organisms/UsersTable/UsersTable";
+import { useSnackbar } from "notistack";
 import { useState } from "react";
 
 const initialUsers = [
@@ -74,12 +75,27 @@ const initialUsers = [
 
 const UsersPage = () => {
   const [users, setUsers] = useState(initialUsers);
+  const { enqueueSnackbar } = useSnackbar();
 
   const toggleActive = (id) => {
+    const user = users.find((u) => u.id === id);
+    const nowActive = !user.active;
+
     setUsers((prev) =>
-      prev.map((user) =>
-        user.id === id ? { ...user, active: !user.active } : user,
-      ),
+      prev.map((u) => (u.id === id ? { ...u, active: nowActive } : u)),
+    );
+
+    enqueueSnackbar(
+      nowActive
+        ? `${user.name} can sign in again.`
+        : `${user.name} can no longer sign in.`,
+      {
+        variant: "toast",
+        title: nowActive ? "User activated" : "User deactivated",
+        tone: "success",
+        actionLabel: "View",
+        onAction: () => console.log("view user", user.id),
+      },
     );
   };
 
