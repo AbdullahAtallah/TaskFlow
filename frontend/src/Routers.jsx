@@ -8,12 +8,15 @@ import ProjectsPage from "./pages/ProjectsPage/ProjectsPage";
 import UsersPage from "./pages/UsersPage/UsersPage";
 import RolesPage from "./pages/RolesPage/RolesPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import GuestGuard from "./routes/GuestGuard";
 
 const Routers = () => {
   return (
     <Routes>
-      <Route path="/sign-in" element={<SignInPage />} />
-      <Route path="/create-account" element={<CreateAccountPage />} />
+      <Route element={<GuestGuard />}>
+        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/create-account" element={<CreateAccountPage />} />
+      </Route>
 
       <Route element={<AppLayout />}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

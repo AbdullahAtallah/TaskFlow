@@ -18,15 +18,6 @@ const AuthFooter = () => {
       >
         © 2026 TaskFlow
       </Typography>
-
-      <Typography
-        sx={{
-          color: "#6b7280",
-          fontSize: "12px",
-        }}
-      >
-        Secured by Auth0
-      </Typography>
     </Box>
   );
 };

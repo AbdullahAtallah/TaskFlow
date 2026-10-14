@@ -5,7 +5,6 @@ export const API_URL = import.meta.env.VITE_API_URL;
 
 const client = axios.create({ baseURL: `${API_URL}/api` });
 
-// Send the token with every request
 client.interceptors.request.use((config) => {
   const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;

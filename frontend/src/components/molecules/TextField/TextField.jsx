@@ -51,6 +51,10 @@ const TextField = ({
             border: 0,
             boxShadow: "0 0 0 4px #365AFF2E",
           },
+        "& .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline": {
+          borderColor: "#dc2626",
+          borderWidth: 1,
+        },
         ...sx,
       }}
     />

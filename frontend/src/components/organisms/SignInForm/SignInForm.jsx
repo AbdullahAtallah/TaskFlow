@@ -1,95 +1,137 @@
 import { Box, Button, Typography, Stack, Link } from "@mui/material";
-import { Link as RouterLink } from "react-router";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router";
 import TextField from "../../molecules/TextField/TextField";
 import RememberMe from "../../molecules/RememberMe/RememberMe";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
+import FormField from "../../molecules/FormField/FormField";
+import AlertBanner from "../../atoms/AlertBanner/AlertBanner";
 import { useState } from "react";
+import { useSnackbar } from "notistack";
+
+import { login } from "../../../api/auth";
+import { saveToken } from "../../../auth/tokenStorage";
+import { getEmailError } from "../../../utils/validation";
+import { getFieldErrors } from "../../../utils/apiErrors";
+
+const linkSx = {
+  fontSize: "14px",
+  cursor: "pointer",
+  color: "#304FFE",
+  fontWeight: 500,
+};
 
 const SignInForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { enqueueSnackbar } = useSnackbar();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [banner, setBanner] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const validate = () => {
+    const result = {};
+    const emailError = getEmailError(email);
+    if (emailError) result.email = emailError;
+    if (!password) result.password = "Enter your password.";
+    return result;
   };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setBanner("");
+
+    const clientErrors = validate();
+    setErrors(clientErrors);
+    if (Object.keys(clientErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      const token = await login({ email: email.trim(), password });
+      saveToken(token, rememberMe);
+
+      const destination = location.state?.from?.pathname ?? "/dashboard";
+      navigate(destination, { replace: true });
+    } catch (error) {
+      setPassword("");
+      const status = error.response?.status;
+      const code = error.response?.data?.error;
+
+      if (!error.response)
+        setBanner("Can't reach the server. Check that the API is running.");
+      else if (status === 429)
+        setBanner("Too many attempts. Try again in 15 minutes.");
+      else if (code === "account_revoked")
+        setBanner("This account is deactivated. Contact an administrator.");
+      else if (status === 401) setBanner("Wrong e-mail address or password.");
+      else if (status === 400) setErrors(getFieldErrors(error));
+      else setBanner("Something went wrong. Try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    enqueueSnackbar("Ask an administrator to reset your password.", {
+      variant: "toast",
+      tone: "info",
+      title: "Forgot your password?",
+    });
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <AuthTitle>Sign in</AuthTitle>
       <AuthDescription>Sign in with your work e-mail address.</AuthDescription>
-      <Stack spacing={1.5}>
-        <Box>
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 1,
-              }}
-            >
-              <Typography
-                component="label"
-                sx={{
-                  fontSize: "14px",
-                  color: "#5a5c65",
-                  fontWeight: 500,
-                }}
-              >
-                E-mail
-              </Typography>
-            </Box>
-            <TextField
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </Box>
-        </Box>
 
-        <Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 1,
-            }}
-          >
-            <Typography
-              component="label"
-              sx={{ fontSize: "14px", color: "#5a5c65", fontWeight: 500 }}
-            >
-              Password
-            </Typography>
+      <AlertBanner>{banner}</AlertBanner>
+      <Stack spacing={1.5}>
+        <FormField label="E-mail" htmlFor="email" error={errors.email}>
+          <TextField
+            id="email"
+            type="email"
+            placeholder="name@example.com"
+            autoComplete="email"
+            value={email}
+            error={Boolean(errors.email)}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </FormField>
+
+        <FormField
+          label="Password"
+          htmlFor="password"
+          error={errors.password}
+          action={
             <Link
-              component={RouterLink}
-              to="#"
+              component="button"
+              type="button"
               underline="hover"
-              sx={{
-                fontSize: "14px",
-                cursor: "pointer",
-                color: "#365aff",
-                fontWeight: 500,
-              }}
+              sx={linkSx}
+              onClick={handleForgotPassword}
             >
               Forgot password?
             </Link>
-          </Box>
+          }
+        >
           <TextField
+            id="password"
             type="password"
+            autoComplete="current-password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            error={Boolean(errors.password)}
+            onChange={(e) => setPassword(e.target.value)}
           />
-        </Box>
-        <Box>
-          <RememberMe
-            checked={rememberMe}
-            onChange={(event) => setRememberMe(event.target.checked)}
-          />
-        </Box>
+        </FormField>
+
+        <RememberMe
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+        />
 
         <Box
           sx={{
@@ -114,7 +156,7 @@ const SignInForm = () => {
               backgroundColor: "#365aff",
             }}
           >
-            Sign in
+            {submitting ? "Signing in…" : "Sign in"}
           </Button>
 
           <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
@@ -123,12 +165,7 @@ const SignInForm = () => {
               component={RouterLink}
               to="/create-account"
               underline="hover"
-              sx={{
-                fontSize: "14px",
-                cursor: "pointer",
-                color: "#304FFE",
-                fontWeight: 500,
-              }}
+              sx={linkSx}
             >
               Create account
             </Link>
