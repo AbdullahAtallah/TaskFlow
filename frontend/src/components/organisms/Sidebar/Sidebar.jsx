@@ -3,18 +3,26 @@ import { House, Users, Folder, User, Shield, LogOut } from "lucide-react";
 import AppLogo from "../../atoms/AppLogo/AppLogo";
 import NavSection from "../../molecules/NavSection/NavSection";
 import NavItem from "../../molecules/NavItem/NavItem";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
+import { Package } from "../../../constants/permissions";
 
 const sections = [
   {
     label: "Workspace",
     items: [
-      { to: "/dashboard", label: "Dashboard", icon: House, count: 6 },
-      { to: "/teams", label: "Teams", icon: Users },
-      { to: "/projects", label: "Projects", icon: Folder },
+      { to: "/dashboard", label: "Dashboard", icon: House },
+      { to: "/teams", label: "Teams", icon: Users, pkg: Package.Teams },
+      {
+        to: "/projects",
+        label: "Projects",
+        icon: Folder,
+        pkg: Package.Projects,
+      },
     ],
   },
   {
     label: "Management",
+    pkg: Package.Management,
     items: [
       { to: "/management/users", label: "Users", icon: User },
       { to: "/management/roles", label: "Roles", icon: Shield },
@@ -23,6 +31,14 @@ const sections = [
 ];
 
 const Sidebar = () => {
+  const { hasPackage, signOut } = useCurrentUser();
+
+  const allowed = (entry) => !entry.pkg || hasPackage(entry.pkg);
+
+  const visibleSections = sections
+    .filter(allowed)
+    .map((section) => ({ ...section, items: section.items.filter(allowed) }))
+    .filter((section) => section.items.length > 0);
   return (
     <Box
       component="aside"
@@ -50,7 +66,7 @@ const Sidebar = () => {
       </Box>
 
       <Box component="nav" sx={{ flex: 1, overflowY: "auto", px: "13px" }}>
-        {sections.map((section) => (
+        {visibleSections.map((section) => (
           <NavSection
             key={section.label}
             label={section.label}
@@ -61,7 +77,7 @@ const Sidebar = () => {
 
       <Stack spacing="3px" sx={{ px: "13px", pb: "20px" }}>
         <NavItem to="/profile" label="Profile" icon={User} />
-        <NavItem to="/sign-in" label="Sign out" icon={LogOut} />
+        <NavItem label="Sign out" icon={LogOut} onClick={signOut} />
       </Stack>
     </Box>
   );

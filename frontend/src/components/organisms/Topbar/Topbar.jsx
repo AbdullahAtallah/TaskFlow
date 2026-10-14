@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { useLocation, Link } from "react-router";
 import AppBreadcrumbs from "../../molecules/AppBreadcrumbs/AppBreadcrumbs";
 import UserInfo from "../../molecules/UserInfo/UserInfo";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
 
 const crumbsByPath = {
   "/dashboard": ["Dashboard"],
@@ -12,10 +13,11 @@ const crumbsByPath = {
   "/management/roles": ["Management", "Roles"],
 };
 
-const user = { name: "Sara Jansen", email: "sara@example.com", role: "Admin" };
-
 const Topbar = () => {
   const { pathname } = useLocation();
+  const { user } = useCurrentUser();
+
+  const roleNames = user?.roles?.map((role) => role.name).join(", ") ?? "";
 
   return (
     <Box
@@ -34,7 +36,11 @@ const Topbar = () => {
       <AppBreadcrumbs items={crumbsByPath[pathname] ?? []} />
       <Link to="/profile" style={{ textDecoration: "none" }}>
         {" "}
-        <UserInfo name={user.name} email={user.email} role={user.role} />
+        <UserInfo
+          name={user?.displayName ?? ""}
+          email={user?.userName ?? ""}
+          role={roleNames}
+        />
       </Link>
     </Box>
   );

@@ -1,4 +1,10 @@
 import { Navigate, Route, Routes } from "react-router";
+import { Package } from "./constants/permissions";
+
+import GuestGuard from "./routes/GuestGuard";
+import AuthGuard from "./routes/AuthGuard";
+import PackageGuard from "./routes/PackageGuard";
+
 import SignInPage from "./pages/SignInPage/SignInPage";
 import CreateAccountPage from "./pages/CreateAccountPage/CreateAccountPage";
 import AppLayout from "./components/templates/AppLayout/AppLayout";
@@ -8,7 +14,7 @@ import ProjectsPage from "./pages/ProjectsPage/ProjectsPage";
 import UsersPage from "./pages/UsersPage/UsersPage";
 import RolesPage from "./pages/RolesPage/RolesPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
-import GuestGuard from "./routes/GuestGuard";
+import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
 const Routers = () => {
   return (
@@ -18,15 +24,28 @@ const Routers = () => {
         <Route path="/create-account" element={<CreateAccountPage />} />
       </Route>
 
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/teams" element={<TeamPage />} />
-        <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/management/users" element={<UsersPage />} />
-        <Route path="/management/roles" element={<RolesPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+      <Route element={<AuthGuard />}>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+
+          <Route element={<PackageGuard pkg={Package.Teams} />}>
+            <Route path="/teams" element={<TeamPage />} />
+          </Route>
+
+          <Route element={<PackageGuard pkg={Package.Projects} />}>
+            <Route path="/projects" element={<ProjectsPage />} />
+          </Route>
+
+          <Route element={<PackageGuard pkg={Package.Management} />}>
+            <Route path="/management/users" element={<UsersPage />} />
+            <Route path="/management/roles" element={<RolesPage />} />
+          </Route>
+        </Route>
       </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

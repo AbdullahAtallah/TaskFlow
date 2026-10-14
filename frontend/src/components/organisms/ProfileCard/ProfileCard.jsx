@@ -1,15 +1,11 @@
 import { Divider, Stack, Button } from "@mui/material";
-import { useNavigate } from "react-router";
 import Card from "../../atoms/Card/Card";
 import ProfileIdentity from "../../molecules/ProfileIdentity/ProfileIdentity";
 import TagGroup from "../../molecules/TagGroup/TagGroup";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
 
 const ProfileCard = ({ user }) => {
-  const navigate = useNavigate();
-
-  const handleSignOut = () => {
-    navigate("/sign-in");
-  };
+  const { signOut } = useCurrentUser();
 
   return (
     <Card sx={{ p: "24px" }}>
@@ -26,7 +22,7 @@ const ProfileCard = ({ user }) => {
 
         <Stack direction="row">
           <Button
-            onClick={handleSignOut}
+            onClick={signOut}
             sx={{
               textTransform: "none",
               backgroundColor: "#ffffff",

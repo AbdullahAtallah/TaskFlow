@@ -1,11 +1,14 @@
 import { Box, Button, Typography, Stack, Link } from "@mui/material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router";
+
 import TextField from "../../molecules/TextField/TextField";
 import RememberMe from "../../molecules/RememberMe/RememberMe";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
 import FormField from "../../molecules/FormField/FormField";
 import AlertBanner from "../../atoms/AlertBanner/AlertBanner";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
+
 import { useState } from "react";
 import { useSnackbar } from "notistack";
 
@@ -22,6 +25,8 @@ const linkSx = {
 };
 
 const SignInForm = () => {
+  const { reloadUser } = useCurrentUser();
+
   const navigate = useNavigate();
   const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
@@ -53,6 +58,7 @@ const SignInForm = () => {
     try {
       const token = await login({ email: email.trim(), password });
       saveToken(token, rememberMe);
+      await reloadUser();
 
       const destination = location.state?.from?.pathname ?? "/dashboard";
       navigate(destination, { replace: true });

@@ -14,11 +14,17 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
     const isSignInCall = error.config?.url?.startsWith("/auth/");
-    if (error.response?.status === 401 && !isSignInCall) {
+    if (status === 401 && !isSignInCall) {
       clearToken();
       window.location.assign("/sign-in");
     }
+
+    if (status === 403) {
+      window.dispatchEvent(new Event("api:forbidden"));
+    }
+
     return Promise.reject(error);
   },
 );

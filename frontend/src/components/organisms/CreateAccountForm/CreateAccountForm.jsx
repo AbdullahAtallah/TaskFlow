@@ -1,11 +1,14 @@
 import { Box, Button, Link, Typography, Stack } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router";
+
 import TextField from "../../molecules/TextField/TextField";
 import AcceptTerms from "../../molecules/AcceptTerms/AcceptTerms";
 import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
 import AlertBanner from "../../atoms/AlertBanner/AlertBanner";
 import FormField from "../../molecules/FormField/FormField";
+import { useCurrentUser } from "../../../context/CurrentUserContext";
+
 import { useState } from "react";
 import { useSnackbar } from "notistack";
 
@@ -22,6 +25,8 @@ const linkSx = {
 };
 
 const CreateAccountForm = () => {
+  const { reloadUser } = useCurrentUser();
+
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -60,13 +65,13 @@ const CreateAccountForm = () => {
 
     setSubmitting(true);
     try {
-      // repeatPassword and acceptTerms are only checked here, never sent
       const token = await register({
         email: email.trim(),
         displayName: name.trim(),
         password,
       });
       saveToken(token, false);
+      await reloadUser();
 
       navigate("/dashboard", { replace: true });
       enqueueSnackbar("An administrator adds you to a team.", {

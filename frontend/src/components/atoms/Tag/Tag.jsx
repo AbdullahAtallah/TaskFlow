@@ -12,8 +12,8 @@ const Tag = ({ children, tone = "neutral" }) => {
     <Box
       component="span"
       sx={{
-        height: "16px",
-        p: "4px 10px",
+        padding: "4px 10px",
+        lineHeight: "16px",
         display: "inline-flex",
         alignItems: "center",
         borderRadius: "999px",
