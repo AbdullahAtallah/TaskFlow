@@ -17,7 +17,11 @@ const ProfileCard = ({ user }) => {
 
         <Stack spacing="16px">
           <TagGroup label="Roles" items={user.roles} tone="purple" />
-          <TagGroup label="Teams" items={user.teams} />
+          <TagGroup
+            label="Teams"
+            items={user.teams}
+            emptyText="Not in any team yet"
+          />
         </Stack>
 
         <Stack direction="row">

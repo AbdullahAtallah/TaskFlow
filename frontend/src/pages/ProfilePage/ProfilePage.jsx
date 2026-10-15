@@ -1,29 +1,21 @@
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
-import { Box } from "@mui/material";
 import PermissionsCard from "../../components/organisms/PermissionsCard/PermissionsCard";
 import ProfileCard from "../../components/organisms/ProfileCard/ProfileCard";
+import { useCurrentUser } from "../../context/CurrentUserContext";
+import toNames from "../../utils/toNames";
+import sortByOrder from "../../utils/sortByOrder";
+import { Package, Claim } from "../../constants/permissions";
+import { Box } from "@mui/material";
 
 const ProfilePage = () => {
-  const currentUser = {
-    name: "Sara Jansen",
-    email: "sara@example.com",
-    roles: ["Admin"],
-    teams: ["Facilities", "Marketing"],
-    packages: ["General", "Teams", "Projects", "Tasks", "Management"],
-    claims: [
-      "Teams.View.All",
-      "Teams.Manage",
-      "Teams.Members.Manage",
-      "Projects.View.All",
-      "Projects.Create",
-      "Projects.Manage",
-      "Tasks.View.All",
-      "Tasks.Create",
-      "Tasks.Manage",
-      "Tasks.Assign",
-      "Tasks.Board.View",
-    ],
+  const { user } = useCurrentUser();
+
+  const profile = {
+    name: user.displayName,
+    email: user.userName,
+    roles: toNames(user.roles),
+    teams: [],
   };
   return (
     <>
@@ -40,10 +32,10 @@ const ProfilePage = () => {
             alignItems: "start",
           }}
         >
-          <ProfileCard user={currentUser} />
+          <ProfileCard user={profile} />
           <PermissionsCard
-            packages={currentUser.packages}
-            claims={currentUser.claims}
+            packages={sortByOrder(user.packages, Object.values(Package))}
+            claims={sortByOrder(user.claims, Object.values(Claim))}
           />
         </Box>
       </PageBody>
