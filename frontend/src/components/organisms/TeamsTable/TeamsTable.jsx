@@ -5,7 +5,7 @@ import SortLabel from "../../molecules/SortLabel/SortLabel";
 import RowActions from "../../molecules/RowActions/RowActions";
 import { formatDate } from "../../../utils";
 
-const TeamsTable = ({ teams, canManage }) => {
+const TeamsTable = ({ teams, canManage, onDelete }) => {
   return (
     <Box
       sx={{
@@ -48,7 +48,9 @@ const TeamsTable = ({ teams, canManage }) => {
               <BodyCell>{team.members}</BodyCell>
               <BodyCell>{team.projects}</BodyCell>
               <BodyCell>{formatDate(team.created)}</BodyCell>
-              <BodyCell>{canManage && <RowActions />}</BodyCell>
+              <BodyCell>
+                {canManage && <RowActions onDelete={() => onDelete(team)} />}
+              </BodyCell>
             </TableRow>
           ))}
         </TableBody>
