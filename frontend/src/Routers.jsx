@@ -10,10 +10,12 @@ import CreateAccountPage from "./pages/CreateAccountPage/CreateAccountPage";
 import AppLayout from "./components/templates/AppLayout/AppLayout";
 import DashboardPage from "./pages/DashboardPage/DashboardPage";
 import TeamPage from "./pages/TeamsPage/TeamsPage";
+import TeamDetailsPage from "./pages/TeamDetailsPage/TeamDetailsPage";
 import ProjectsPage from "./pages/ProjectsPage/ProjectsPage";
 import UsersPage from "./pages/UsersPage/UsersPage";
 import RolesPage from "./pages/RolesPage/RolesPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
+
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
 const Routers = () => {
@@ -32,6 +34,7 @@ const Routers = () => {
 
           <Route element={<PackageGuard pkg={Package.Teams} />}>
             <Route path="/teams" element={<TeamPage />} />
+            <Route path="/teams/:id" element={<TeamDetailsPage />} />
           </Route>
 
           <Route element={<PackageGuard pkg={Package.Projects} />}>

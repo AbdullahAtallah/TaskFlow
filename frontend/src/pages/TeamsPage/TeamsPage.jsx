@@ -12,9 +12,12 @@ import { Claim } from "../../constants/permissions";
 import { deleteTeam } from "../../api/teams";
 import { useSnackbar } from "notistack";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import afterWrite from "../../utils/afterWrite";
 
 const TeamsPage = () => {
+  const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const query = useDebouncedValue(search);
   const { teams, total, loading, error, reload } = useTeams(query);
@@ -92,6 +95,7 @@ const TeamsPage = () => {
           <TeamsTable
             teams={teams}
             canManage={canManage}
+            onEdit={(team) => navigate(`/teams/${team.id}`)}
             onDelete={handleDelete}
           />
         )}
