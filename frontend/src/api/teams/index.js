@@ -16,8 +16,8 @@ export const updateTeam = (id, { name, description, rowVersion }) =>
 
 export const deleteTeam = (id) => client.delete(`/team/${id}`);
 
-export const addTeamMember = (id, member) =>
-  client.post(`/team/${id}/member`, member);
+export const addTeamMembers = (teamId, userIds) =>
+  client.post(`/team/${teamId}/member`, { teamId, userIds });
 
-export const removeTeamMember = (id, userId) =>
-  client.delete(`/team/${id}/member/${userId}`);
+export const removeTeamMember = (teamId, userId) =>
+  client.delete(`/team/${teamId}/member/${userId}`);

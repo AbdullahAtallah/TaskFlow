@@ -1,11 +1,27 @@
-import { Box, Table, TableBody, TableHead, TableRow } from "@mui/material";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  Typography,
+  TableCell,
+} from "@mui/material";
 import HeadCell from "../../atoms/HeadCell/HeadCell";
 import BodyCell from "../../atoms/BodyCell/BodyCell";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import RowActions from "../../molecules/RowActions/RowActions";
 import { formatDate } from "../../../utils";
 
-const TeamsTable = ({ teams, canManage, onDelete, onEdit }) => {
+const TeamsTable = ({
+  teams,
+  loading,
+  canManage,
+  onDelete,
+  onEdit,
+  emptyTitle,
+  emptyText,
+}) => {
   return (
     <Box
       sx={{
@@ -36,6 +52,26 @@ const TeamsTable = ({ teams, canManage, onDelete, onEdit }) => {
         </TableHead>
 
         <TableBody>
+          {teams.length === 0 && !loading && (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                sx={{ py: "48px", textAlign: "center", borderBottom: 0 }}
+              >
+                <Typography
+                  sx={{ fontSize: "15px", fontWeight: 500, color: "#111827" }}
+                >
+                  {emptyTitle}
+                </Typography>
+                <Typography
+                  sx={{ mt: "4px", fontSize: "14px", color: "#6b7280" }}
+                >
+                  {emptyText}
+                </Typography>
+              </TableCell>
+            </TableRow>
+          )}
+
           {teams.map((team) => (
             <TableRow
               key={team.id}

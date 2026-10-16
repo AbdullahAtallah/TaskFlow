@@ -49,6 +49,19 @@ const TeamsPage = () => {
     }
   };
 
+  const canViewAll = hasClaim(Claim.TeamsViewAll);
+
+  const emptyTitle = search
+    ? "No teams found"
+    : canViewAll
+      ? "No teams yet"
+      : "You're not in any team yet";
+  const emptyText = search
+    ? `Nothing matches "${search}".`
+    : canViewAll
+      ? "Create the first team to get started."
+      : "Ask an admin to add you to a team.";
+
   const countLabel = loading ? "Loading…" : `${total} teams`;
   return (
     <>
@@ -97,6 +110,9 @@ const TeamsPage = () => {
             canManage={canManage}
             onEdit={(team) => navigate(`/teams/${team.id}`)}
             onDelete={handleDelete}
+            emptyTitle={emptyTitle}
+            emptyText={emptyText}
+            loading={loading}
           />
         )}
       </PageBody>

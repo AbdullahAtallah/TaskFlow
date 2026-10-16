@@ -8,6 +8,7 @@ import PageTabs from "../../components/molecules/PageTabs/PageTabs";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
 import TeamGeneralCard from "../../components/organisms/TeamGeneralCard/TeamGeneralCard";
 import TeamDangerCard from "../../components/organisms/TeamDangerCard/TeamDangerCard";
+import TeamMembersTab from "../../components/organisms/TeamMembersTab/TeamMembersTab";
 import useTeam from "../../hooks/useTeam";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
@@ -20,6 +21,7 @@ const TeamDetailsPage = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { hasClaim } = useCurrentUser();
   const canManage = hasClaim(Claim.TeamsManage);
+  const canManageMembers = hasClaim(Claim.TeamsMembersManage);
 
   const { team, loading, error, reload } = useTeam(id);
   const [tab, setTab] = useState("general");
@@ -96,9 +98,9 @@ const TeamDetailsPage = () => {
           ]}
         />
 
-        <Box sx={{ maxWidth: "645px", mt: "24px" }}>
+        <Box sx={{ mt: "24px" }}>
           {tab === "general" && (
-            <Stack spacing="24px">
+            <Stack spacing="24px" sx={{ maxWidth: "645px" }}>
               <TeamGeneralCard
                 team={team}
                 canManage={canManage}
@@ -115,9 +117,11 @@ const TeamDetailsPage = () => {
             </Stack>
           )}
           {tab === "members" && (
-            <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
-              Members
-            </Typography>
+            <TeamMembersTab
+              teamId={team.id}
+              canManage={canManageMembers}
+              onChanged={reload}
+            />
           )}
           {tab === "projects" && (
             <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
