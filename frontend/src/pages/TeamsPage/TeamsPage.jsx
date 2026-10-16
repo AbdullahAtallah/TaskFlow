@@ -1,62 +1,30 @@
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import TextField from "../../components/molecules/TextField/TextField";
 import TeamsTable from "../../components/organisms/TeamsTable/TeamsTable";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
+import useTeams from "../../hooks/useTeams";
+import useDebouncedValue from "../../hooks/useDebouncedValue";
+import { useCurrentUser } from "../../context/CurrentUserContext";
+import { Claim } from "../../constants/permissions";
 import { useState } from "react";
-
-const teams = [
-  {
-    id: 1,
-    name: "Facilities",
-    description: "Building operations, maintenance and office moves",
-    members: 5,
-    projects: 3,
-    created: "12 jan 2026",
-  },
-  {
-    id: 2,
-    name: "Marketing",
-    description: "Brand, website and campaigns",
-    members: 3,
-    projects: 2,
-    created: "3 feb 2026",
-  },
-  {
-    id: 3,
-    name: "IT Services",
-    description: "Workplace hardware, access and software",
-    members: 3,
-    projects: 2,
-    created: "18 feb 2026",
-  },
-  {
-    id: 4,
-    name: "Finance",
-    description: "Budgeting and reporting",
-    members: 2,
-    projects: 1,
-    created: "2 mrt 2026",
-  },
-];
 
 const TeamsPage = () => {
   const [search, setSearch] = useState("");
+  const query = useDebouncedValue(search);
+  const { teams, total, loading, error, reload } = useTeams(query);
+  const { hasClaim } = useCurrentUser();
+  const canManage = hasClaim(Claim.TeamsManage);
 
-  const query = search.trim().toLowerCase();
-  const visibleTeams = teams.filter((team) =>
-    team.name.toLowerCase().includes(query),
-  );
-
-  const countLabel = `${visibleTeams.length} ${visibleTeams.length === 1 ? "team" : "teams"}`;
+  const countLabel = loading ? "Loading…" : `${total} teams`;
   return (
     <>
       <PageHeader
         title="Teams"
         subtitle="All teams in the organisation"
         actions={
-          <>
+          canManage && (
             <Button
               variant="contained"
               sx={{
@@ -72,7 +40,7 @@ const TeamsPage = () => {
             >
               New team
             </Button>
-          </>
+          )
         }
       />
       <PageBody>
@@ -87,7 +55,13 @@ const TeamsPage = () => {
           />
         </PageToolbar>
 
-        <TeamsTable teams={visibleTeams} />
+        {error ? (
+          <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
+            Could not load teams. Please try again.
+          </Typography>
+        ) : (
+          <TeamsTable teams={teams} canManage={canManage} />
+        )}
       </PageBody>
     </>
   );

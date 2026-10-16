@@ -3,9 +3,9 @@ import HeadCell from "../../atoms/HeadCell/HeadCell";
 import BodyCell from "../../atoms/BodyCell/BodyCell";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import RowActions from "../../molecules/RowActions/RowActions";
-import { useState } from "react";
+import { formatDate } from "../../../utils";
 
-const TeamsTable = ({ teams }) => {
+const TeamsTable = ({ teams, canManage }) => {
   return (
     <Box
       sx={{
@@ -47,10 +47,8 @@ const TeamsTable = ({ teams }) => {
               <BodyCell>{team.description}</BodyCell>
               <BodyCell>{team.members}</BodyCell>
               <BodyCell>{team.projects}</BodyCell>
-              <BodyCell>{team.created}</BodyCell>
-              <BodyCell>
-                <RowActions />
-              </BodyCell>
+              <BodyCell>{formatDate(team.created)}</BodyCell>
+              <BodyCell>{canManage && <RowActions />}</BodyCell>
             </TableRow>
           ))}
         </TableBody>
