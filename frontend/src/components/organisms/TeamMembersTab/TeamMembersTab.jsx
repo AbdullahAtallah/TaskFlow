@@ -1,15 +1,45 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button, Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import TeamMembersTable from "../TeamMembersTable/TeamMembersTable";
+import AddMembersDialog from "../AddMembersDialog/AddMembersDialog";
 import useTeamMembers from "../../../hooks/useTeamMembers";
-import { removeTeamMember } from "../../../api/teams";
+import { addTeamMembers, removeTeamMember } from "../../../api/teams";
 import afterWrite from "../../../utils/afterWrite";
 
-const TeamMembersTab = ({ teamId, canManage, onChanged }) => {
+const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
   const { members, loading, error, reload } = useTeamMembers(teamId);
   const { enqueueSnackbar } = useSnackbar();
   const [removingId, setRemovingId] = useState(null);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+
+  const existingIds = useMemo(() => members.map((m) => m.userId), [members]);
+
+  const handleAdd = async (userIds) => {
+    setAdding(true);
+    try {
+      await addTeamMembers(teamId, userIds);
+      await afterWrite(async () => {
+        await reload();
+        onChanged?.();
+      });
+      enqueueSnackbar(
+        `${userIds.length} ${userIds.length === 1 ? "member was" : "members were"} added to ${teamName}.`,
+        { variant: "toast", tone: "success", title: "Members added" },
+      );
+      setDialogOpen(false);
+    } catch {
+      enqueueSnackbar("The members could not be added.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const handleRemove = async (member) => {
     setRemovingId(member.userId);
@@ -59,6 +89,7 @@ const TeamMembersTab = ({ teamId, canManage, onChanged }) => {
 
         {canManage && (
           <Button
+            onClick={() => setDialogOpen(true)}
             sx={{
               textTransform: "none",
               height: "38px",
@@ -81,6 +112,14 @@ const TeamMembersTab = ({ teamId, canManage, onChanged }) => {
         canManage={canManage}
         removingId={removingId}
         onRemove={handleRemove}
+      />
+      <AddMembersDialog
+        open={dialogOpen}
+        teamName={teamName}
+        existingIds={existingIds}
+        saving={adding}
+        onAdd={handleAdd}
+        onClose={() => setDialogOpen(false)}
       />
     </Stack>
   );

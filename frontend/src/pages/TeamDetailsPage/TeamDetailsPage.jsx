@@ -119,6 +119,7 @@ const TeamDetailsPage = () => {
           {tab === "members" && (
             <TeamMembersTab
               teamId={team.id}
+              teamName={team.name}
               canManage={canManageMembers}
               onChanged={reload}
             />
