@@ -17,6 +17,7 @@ const TeamsTable = ({
   teams,
   loading,
   canManage,
+  onOpen,
   onDelete,
   onEdit,
   emptyTitle,
@@ -75,6 +76,7 @@ const TeamsTable = ({
           {teams.map((team) => (
             <TableRow
               key={team.id}
+              onClick={() => onOpen(team)}
               sx={{
                 "&:last-child td": { borderBottom: 0 },
               }}
@@ -85,12 +87,15 @@ const TeamsTable = ({
               <BodyCell>{team.projects}</BodyCell>
               <BodyCell>{formatDate(team.created)}</BodyCell>
               <BodyCell>
-                {canManage && (
-                  <RowActions
-                    onEdit={() => onEdit(team)}
-                    onDelete={() => onDelete(team)}
-                  />
-                )}
+                <Box onClick={(e) => e.stopPropagation()}>
+                  {" "}
+                  {canManage && (
+                    <RowActions
+                      onEdit={() => onEdit(team)}
+                      onDelete={() => onDelete(team)}
+                    />
+                  )}
+                </Box>
               </BodyCell>
             </TableRow>
           ))}

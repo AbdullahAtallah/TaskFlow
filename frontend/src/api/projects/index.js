@@ -1,0 +1,9 @@
+import client from "../client";
+import gridParams from "../gridParams";
+
+export const getProjects = ({ teamId, ...options } = {}) =>
+  client
+    .get("/project", {
+      params: { ...gridParams(options), ...(teamId && { teamId }) },
+    })
+    .then((r) => r.data);

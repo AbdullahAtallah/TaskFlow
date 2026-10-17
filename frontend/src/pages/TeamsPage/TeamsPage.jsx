@@ -136,6 +136,7 @@ const TeamsPage = () => {
             canManage={canManage}
             onEdit={(team) => navigate(`/teams/${team.id}`)}
             onDelete={handleDelete}
+            onOpen={(team) => navigate(`/teams/${team.id}`)}
             emptyTitle={emptyTitle}
             emptyText={emptyText}
             loading={loading}

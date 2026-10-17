@@ -9,7 +9,9 @@ import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader
 import TeamGeneralCard from "../../components/organisms/TeamGeneralCard/TeamGeneralCard";
 import TeamDangerCard from "../../components/organisms/TeamDangerCard/TeamDangerCard";
 import TeamMembersTab from "../../components/organisms/TeamMembersTab/TeamMembersTab";
+import TeamProjectsTable from "../../components/organisms/TeamProjectsTable/TeamProjectsTable";
 import useTeam from "../../hooks/useTeam";
+import useTeamProjects from "../../hooks/useTeamProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
 import { deleteTeam, updateTeam } from "../../api/teams";
@@ -24,6 +26,7 @@ const TeamDetailsPage = () => {
   const canManageMembers = hasClaim(Claim.TeamsMembersManage);
 
   const { team, loading, error, reload } = useTeam(id);
+  const { projects, loading: projectsLoading } = useTeamProjects(id);
   const [tab, setTab] = useState("general");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -125,9 +128,7 @@ const TeamDetailsPage = () => {
             />
           )}
           {tab === "projects" && (
-            <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
-              Projects
-            </Typography>
+            <TeamProjectsTable projects={projects} loading={projectsLoading} />
           )}
         </Box>
       </PageBody>
