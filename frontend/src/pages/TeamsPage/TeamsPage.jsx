@@ -5,11 +5,12 @@ import TextField from "../../components/molecules/TextField/TextField";
 import TeamsTable from "../../components/organisms/TeamsTable/TeamsTable";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
+import NewTeamDialog from "../../components/organisms/NewTeamDialog/NewTeamDialog";
 import useTeams from "../../hooks/useTeams";
 import useDebouncedValue from "../../hooks/useDebouncedValue";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
-import { deleteTeam } from "../../api/teams";
+import { deleteTeam, createTeam } from "../../api/teams";
 import { useSnackbar } from "notistack";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -21,10 +22,34 @@ const TeamsPage = () => {
   const [search, setSearch] = useState("");
   const query = useDebouncedValue(search);
   const { teams, total, loading, error, reload } = useTeams(query);
-  const { hasClaim } = useCurrentUser();
+  const { user, hasClaim } = useCurrentUser();
   const canManage = hasClaim(Claim.TeamsManage);
   const { enqueueSnackbar } = useSnackbar();
   const [blockedTeam, setBlockedTeam] = useState(null);
+  const [newTeamOpen, setNewTeamOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const handleCreate = async ({ name, description, memberIds }) => {
+    setCreating(true);
+    try {
+      await createTeam({ name, description, memberIds });
+      await afterWrite(reload);
+      enqueueSnackbar(`${name} was created.`, {
+        variant: "toast",
+        tone: "success",
+        title: "Team created",
+      });
+      setNewTeamOpen(false);
+    } catch {
+      enqueueSnackbar("The team could not be created.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handleDelete = async (team) => {
     if (team.projects > 0) {
@@ -72,6 +97,7 @@ const TeamsPage = () => {
           canManage && (
             <Button
               variant="contained"
+              onClick={() => setNewTeamOpen(true)}
               sx={{
                 textTransform: "none",
                 backgroundColor: "#365aff",
@@ -162,6 +188,13 @@ const TeamsPage = () => {
         {blockedTeam?.projects === 1 ? "project" : "projects"}. Move or delete
         these projects first.
       </AppDialog>
+      <NewTeamDialog
+        open={newTeamOpen}
+        currentUserId={user.id}
+        saving={creating}
+        onCreate={handleCreate}
+        onClose={() => setNewTeamOpen(false)}
+      />
     </>
   );
 };
