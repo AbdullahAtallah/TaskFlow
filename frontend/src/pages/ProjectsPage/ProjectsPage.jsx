@@ -5,10 +5,14 @@ import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import ProjectsTable from "../../components/organisms/ProjectsTable/ProjectsTable";
+import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import useTeams from "../../hooks/useTeams";
 import useProjects from "../../hooks/useProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
+import { useSnackbar } from "notistack";
+import { deleteProject } from "../../api/projects";
+import afterWrite from "../../utils/afterWrite";
 
 const ALL_TEAMS = "All teams";
 
@@ -18,16 +22,41 @@ const ProjectsPage = () => {
   const canCreate = hasClaim(Claim.ProjectsCreate);
   const canManage = hasClaim(Claim.ProjectsManage);
 
+  const [toDelete, setToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const { teams } = useTeams("");
   const tabs = [ALL_TEAMS, ...teams.map((t) => t.name)];
 
   const teamId = teams.find((t) => t.name === selectedTeam)?.id ?? "all";
-  const { projects, total, loading, error } = useProjects(teamId);
+  const { projects, total, loading, error, reload } = useProjects(teamId);
+  const { enqueueSnackbar } = useSnackbar();
 
   const countLabel = loading
     ? "Loading…"
     : `${total} ${total === 1 ? "project" : "projects"}`;
 
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteProject(toDelete.id);
+      await afterWrite(reload);
+      enqueueSnackbar(`${toDelete.name} and its tasks were deleted.`, {
+        variant: "toast",
+        tone: "success",
+        title: "Project deleted",
+      });
+      setToDelete(null);
+    } catch {
+      enqueueSnackbar(`${toDelete.name} could not be deleted.`, {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
   return (
     <>
       <PageHeader
@@ -72,9 +101,57 @@ const ProjectsPage = () => {
             projects={projects}
             loading={loading}
             canManage={canManage}
+            onDelete={setToDelete}
           />
         )}
       </PageBody>
+      <AppDialog
+        open={Boolean(toDelete)}
+        title="Delete project"
+        onClose={deleting ? undefined : () => setToDelete(null)}
+        actions={
+          <>
+            <Button
+              onClick={() => setToDelete(null)}
+              disabled={deleting}
+              sx={{
+                textTransform: "none",
+                height: "38px",
+                px: "14px",
+                borderRadius: "6px",
+                border: "1px solid #e5e7eb",
+                backgroundColor: "#ffffff",
+                color: "#111827",
+                fontWeight: 500,
+                fontSize: 14,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={confirmDelete}
+              disabled={deleting}
+              sx={{
+                textTransform: "none",
+                height: "38px",
+                px: "14px",
+                borderRadius: "6px",
+                backgroundColor: "#dc2626",
+                boxShadow: 0,
+                fontWeight: 500,
+                fontSize: 14,
+                "&:hover": { backgroundColor: "#b91c1c", boxShadow: 0 },
+              }}
+            >
+              {deleting ? "Deleting…" : "Delete project"}
+            </Button>
+          </>
+        }
+      >
+        {toDelete?.name} and all of its tasks will be deleted. Deleted rows stay
+        in the database with a deletion date.
+      </AppDialog>
     </>
   );
 };

@@ -7,3 +7,5 @@ export const getProjects = ({ teamId, ...options } = {}) =>
       params: { ...gridParams(options), ...(teamId && { teamId }) },
     })
     .then((r) => r.data);
+
+export const deleteProject = (id) => client.delete(`/project/${id}`);
