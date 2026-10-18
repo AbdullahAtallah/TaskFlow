@@ -37,6 +37,9 @@ const SegmentedTabs = ({ options, value, onChange, ariaLabel = "Filter" }) => {
           backgroundColor: "#ffffff",
           color: "#4a4a4a",
         },
+        "& .MuiToggleButton-root.Mui-selected:hover": {
+          backgroundColor: "#ffffff",
+        },
       }}
     >
       {options.map((option) => (
