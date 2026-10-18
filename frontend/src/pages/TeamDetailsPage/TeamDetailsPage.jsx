@@ -10,6 +10,7 @@ import TeamGeneralCard from "../../components/organisms/TeamGeneralCard/TeamGene
 import TeamDangerCard from "../../components/organisms/TeamDangerCard/TeamDangerCard";
 import TeamMembersTab from "../../components/organisms/TeamMembersTab/TeamMembersTab";
 import TeamProjectsTable from "../../components/organisms/TeamProjectsTable/TeamProjectsTable";
+import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
 import useTeam from "../../hooks/useTeam";
 import useTeamProjects from "../../hooks/useTeamProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -32,6 +33,20 @@ const TeamDetailsPage = () => {
   const [deleting, setDeleting] = useState(false);
 
   if (loading && !team) return <FullPageLoader />;
+
+  if (error?.response?.status === 404) {
+    return (
+      <PageBody>
+        <NotFoundState
+          title="Team not found"
+          message="This team doesn't exist, or you're not a member of it."
+          backTo="/teams"
+          backLabel="Back to teams"
+        />
+      </PageBody>
+    );
+  }
+
   if (error || !team) {
     return (
       <PageBody>

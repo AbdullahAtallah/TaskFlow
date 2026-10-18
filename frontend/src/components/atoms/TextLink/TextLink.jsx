@@ -1,10 +1,11 @@
 import { Link } from "@mui/material";
 
-const TextLink = ({ children, onClick }) => {
+const TextLink = ({ children, onClick, component, to }) => {
   return (
     <Link
-      component="button"
+      component={component}
       onClick={onClick}
+      to={to}
       sx={{
         fontSize: "14px",
         fontWeight: 500,
