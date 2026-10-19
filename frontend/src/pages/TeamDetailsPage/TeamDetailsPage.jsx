@@ -14,6 +14,7 @@ import NotFoundState from "../../components/molecules/NotFoundState/NotFoundStat
 import useTeam from "../../hooks/useTeam";
 import useTeamProjects from "../../hooks/useTeamProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
+import { useBreadcrumbs } from "../../context/BreadcrumbContext";
 import { Claim } from "../../constants/permissions";
 import { deleteTeam, updateTeam } from "../../api/teams";
 import afterWrite from "../../utils/afterWrite";
@@ -31,6 +32,10 @@ const TeamDetailsPage = () => {
   const [tab, setTab] = useState("general");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  useBreadcrumbs(
+    team ? [{ label: "Teams", to: "/teams" }, { label: team.name }] : null,
+  );
 
   if (loading && !team) return <FullPageLoader />;
 

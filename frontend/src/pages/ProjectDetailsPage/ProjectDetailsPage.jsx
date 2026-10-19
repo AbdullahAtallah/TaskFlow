@@ -8,6 +8,8 @@ import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
 import useProject from "../../hooks/useProject";
 import { useCurrentUser } from "../../context/CurrentUserContext";
+import { useBreadcrumbs } from "../../context/BreadcrumbContext";
+import { Package } from "../../constants/permissions";
 import { Claim } from "../../constants/permissions";
 
 const VIEWS = ["List", "Board"];
@@ -15,9 +17,23 @@ const VIEWS = ["List", "Board"];
 const ProjectDetailsPage = () => {
   const { id } = useParams();
   const { project, loading, error } = useProject(id);
-  const { hasClaim } = useCurrentUser();
+  const { hasClaim, hasPackage } = useCurrentUser();
   const canCreateTask = hasClaim(Claim.TasksCreate);
+  const canSeeTeams = hasPackage(Package.Teams);
   const [view, setView] = useState("List");
+
+  useBreadcrumbs(
+    project
+      ? [
+          { label: "Projects", to: "/projects" },
+          {
+            label: project.teamName,
+            to: canSeeTeams ? `/teams/${project.teamId}` : undefined,
+          },
+          { label: project.name },
+        ]
+      : null,
+  );
 
   if (loading && !project) return <FullPageLoader />;
 
