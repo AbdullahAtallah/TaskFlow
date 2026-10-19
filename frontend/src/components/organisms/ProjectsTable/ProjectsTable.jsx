@@ -14,7 +14,7 @@ import ClampText from "../../atoms/ClampText/ClampText";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import { formatDate } from "../../../utils";
 
-const ProjectsTable = ({ projects, loading, canManage, onDelete }) => {
+const ProjectsTable = ({ projects, loading, canManage, onOpen, onDelete }) => {
   return (
     <Box
       sx={{
@@ -69,6 +69,7 @@ const ProjectsTable = ({ projects, loading, canManage, onDelete }) => {
           {projects.map((project) => (
             <TableRow
               key={project.id}
+              onClick={() => onOpen(project)}
               sx={{
                 "&:last-child td": { borderBottom: 0 },
                 ...(project.hasOverdue && {
@@ -88,7 +89,12 @@ const ProjectsTable = ({ projects, loading, canManage, onDelete }) => {
               <BodyCell>{formatDate(project.created)}</BodyCell>
               <BodyCell>
                 {canManage && (
-                  <TextLink onClick={() => onDelete?.(project)}>
+                  <TextLink
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete?.(project);
+                    }}
+                  >
                     Delete
                   </TextLink>
                 )}

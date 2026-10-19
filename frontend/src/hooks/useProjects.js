@@ -24,8 +24,10 @@ const useProjects = (teamId) => {
         .filter((p) => !filter || p.teamId === filter);
       setProjects(rows);
       setTotal(filter ? rows.length : res.total);
+      return rows;
     } catch (err) {
       setError(err);
+      return [];
     } finally {
       setLoading(false);
     }

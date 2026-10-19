@@ -12,12 +12,15 @@ import useProjects from "../../hooks/useProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
 import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router";
 import { createProject, deleteProject } from "../../api/projects";
 import afterWrite from "../../utils/afterWrite";
 
 const ALL_TEAMS = "All teams";
 
 const ProjectsPage = () => {
+  const navigate = useNavigate();
+
   const [selectedTeam, setSelectedTeam] = useState(ALL_TEAMS);
   const { hasClaim } = useCurrentUser();
   const canCreate = hasClaim(Claim.ProjectsCreate);
@@ -66,13 +69,18 @@ const ProjectsPage = () => {
     setCreating(true);
     try {
       await createProject({ teamId, name, description });
-      await afterWrite(reload);
-
+      const rows = await afterWrite(reload);
+      const created = rows?.find((p) => p.name === name && p.teamId === teamId);
       const teamName = teams.find((t) => t.id === teamId)?.name;
+
       enqueueSnackbar(`${name} was added to ${teamName}.`, {
         variant: "toast",
         tone: "success",
         title: "Project created",
+        ...(created && {
+          actionLabel: "View",
+          onAction: () => navigate(`/projects/${created.id}`),
+        }),
       });
       setNewOpen(false);
     } catch {
@@ -129,6 +137,7 @@ const ProjectsPage = () => {
             projects={projects}
             loading={loading}
             canManage={canManage}
+            onOpen={(project) => navigate(`/projects/${project.id}`)}
             onDelete={setToDelete}
           />
         )}
