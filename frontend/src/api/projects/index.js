@@ -9,3 +9,6 @@ export const getProjects = ({ teamId, ...options } = {}) =>
     .then((r) => r.data);
 
 export const deleteProject = (id) => client.delete(`/project/${id}`);
+
+export const createProject = ({ teamId, name, description }) =>
+  client.post("/project", { teamId, name, description });

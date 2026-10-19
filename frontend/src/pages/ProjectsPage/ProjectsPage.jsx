@@ -6,12 +6,13 @@ import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import ProjectsTable from "../../components/organisms/ProjectsTable/ProjectsTable";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
+import NewProjectDialog from "../../components/organisms/NewProjectDialog/NewProjectDialog";
 import useTeams from "../../hooks/useTeams";
 import useProjects from "../../hooks/useProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim } from "../../constants/permissions";
 import { useSnackbar } from "notistack";
-import { deleteProject } from "../../api/projects";
+import { createProject, deleteProject } from "../../api/projects";
 import afterWrite from "../../utils/afterWrite";
 
 const ALL_TEAMS = "All teams";
@@ -24,6 +25,9 @@ const ProjectsPage = () => {
 
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [newOpen, setNewOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const { teams } = useTeams("");
   const tabs = [ALL_TEAMS, ...teams.map((t) => t.name)];
@@ -57,16 +61,40 @@ const ProjectsPage = () => {
       setDeleting(false);
     }
   };
+
+  const handleCreate = async ({ teamId, name, description }) => {
+    setCreating(true);
+    try {
+      await createProject({ teamId, name, description });
+      await afterWrite(reload);
+
+      const teamName = teams.find((t) => t.id === teamId)?.name;
+      enqueueSnackbar(`${name} was added to ${teamName}.`, {
+        variant: "toast",
+        tone: "success",
+        title: "Project created",
+      });
+      setNewOpen(false);
+    } catch {
+      enqueueSnackbar("The project could not be created.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <>
       <PageHeader
         title="Projects"
-        subtitle="Projects of every team
-
-"
+        subtitle="Projects of every team"
         actions={
           canCreate && (
             <Button
+              onClick={() => setNewOpen(true)}
               variant="contained"
               sx={{
                 textTransform: "none",
@@ -152,6 +180,14 @@ const ProjectsPage = () => {
         {toDelete?.name} and all of its tasks will be deleted. Deleted rows stay
         in the database with a deletion date.
       </AppDialog>
+      <NewProjectDialog
+        open={newOpen}
+        teams={teams}
+        defaultTeamName={selectedTeam === ALL_TEAMS ? undefined : selectedTeam}
+        saving={creating}
+        onCreate={handleCreate}
+        onClose={() => setNewOpen(false)}
+      />
     </>
   );
 };
