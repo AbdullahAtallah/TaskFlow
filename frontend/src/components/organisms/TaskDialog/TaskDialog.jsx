@@ -78,7 +78,7 @@ const TaskDialog = ({
     let hasError = false;
 
     if (!title.trim()) {
-      setTitleError("Enter a title.");
+      setTitleError("This field is required");
       hasError = true;
     }
 
@@ -118,7 +118,7 @@ const TaskDialog = ({
             disabled={saving}
             sx={primaryBtn}
           >
-            {saving ? "Saving…" : isEdit ? "Save changes" : "Create task"}
+            {saving ? "Saving…" : isEdit ? "Save" : "Create task"}
           </Button>
         </>
       }

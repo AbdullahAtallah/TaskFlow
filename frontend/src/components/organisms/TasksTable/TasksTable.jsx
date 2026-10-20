@@ -86,10 +86,11 @@ const TasksTable = ({ tasks, loading, canManage, onEdit, onDelete }) => (
           return (
             <TableRow
               key={task.id}
+              onClick={canManage ? () => onEdit?.(task) : undefined}
               sx={{
                 "&:last-child td": { borderBottom: 0 },
                 ...(overdueDays > 0 && {
-                  "& td:first-of-type": { boxShadow: "inset 4px 0 0 #eb7b20" },
+                  "& td:first-of-type": { boxShadow: "inset 3px 0 0 #eb7b20" },
                 }),
               }}
             >
@@ -130,12 +131,14 @@ const TasksTable = ({ tasks, loading, canManage, onEdit, onDelete }) => (
 
               <BodyCell>
                 {canManage && (
-                  <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
-                    <RowActions
-                      onEdit={() => onEdit?.(task)}
-                      onDelete={() => onDelete?.(task)}
-                    />
-                  </Stack>
+                  <Box onClick={(e) => e.stopPropagation()}>
+                    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+                      <RowActions
+                        onEdit={() => onEdit?.(task)}
+                        onDelete={() => onDelete?.(task)}
+                      />
+                    </Stack>
+                  </Box>
                 )}
               </BodyCell>
             </TableRow>

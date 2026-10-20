@@ -17,8 +17,10 @@ import filterTasks from "../../utils/filterTasks";
 import { useSnackbar } from "notistack";
 import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
 import useTeamMembers from "../../hooks/useTeamMembers";
-import { createTask } from "../../api/tasks";
+import { createTask, deleteTask, getTask, updateTask } from "../../api/tasks";
 import afterWrite from "../../utils/afterWrite";
+import AppDialog from "../../components/organisms/AppDialog/AppDialog";
+import { toTaskRow } from "../../api/tasks/mappers";
 
 const VIEWS = ["List", "Board"];
 const DEFAULT_FILTERS = {
@@ -27,9 +29,43 @@ const DEFAULT_FILTERS = {
   assignee: "Everyone",
 };
 
+const primaryBtn = {
+  textTransform: "none",
+  backgroundColor: "#365aff",
+  fontWeight: 500,
+  fontSize: 14,
+  p: "0 12px",
+  height: "38px",
+  borderRadius: "6px",
+  boxShadow: 0,
+};
+const secondaryBtn = {
+  textTransform: "none",
+  height: "38px",
+  px: "14px",
+  borderRadius: "6px",
+  border: "1px solid #e5e7eb",
+  backgroundColor: "#ffffff",
+  color: "#111827",
+  fontWeight: 500,
+  fontSize: 14,
+};
+const dangerBtn = {
+  textTransform: "none",
+  height: "38px",
+  px: "14px",
+  borderRadius: "6px",
+  backgroundColor: "#dc2626",
+  boxShadow: 0,
+  fontWeight: 500,
+  fontSize: 14,
+  "&:hover": { backgroundColor: "#b91c1c", boxShadow: 0 },
+};
+
 const ProjectDetailsPage = () => {
   const { id } = useParams();
   const { user, hasClaim, hasPackage } = useCurrentUser();
+  const { enqueueSnackbar } = useSnackbar();
 
   const { project, loading, error } = useProject(id);
   const {
@@ -37,14 +73,15 @@ const ProjectDetailsPage = () => {
     loading: tasksLoading,
     reload: reloadTasks,
   } = useProjectTasks(id);
-
   const { members } = useTeamMembers(project?.teamId);
-  const { enqueueSnackbar } = useSnackbar();
-  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [savingTask, setSavingTask] = useState(false);
 
   const [view, setView] = useState("List");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [savingTask, setSavingTask] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const canCreateTask = hasClaim(Claim.TasksCreate);
   const canManageTasks = hasClaim(Claim.TasksManage);
@@ -67,28 +104,6 @@ const ProjectDetailsPage = () => {
         ]
       : null,
   );
-
-  const handleCreateTask = async (values) => {
-    setSavingTask(true);
-    try {
-      await createTask({ projectId: id, ...values });
-      await afterWrite(reloadTasks);
-      enqueueSnackbar(`${values.title} was added to ${project.name}.`, {
-        variant: "toast",
-        tone: "success",
-        title: "Task created",
-      });
-      setTaskDialogOpen(false);
-    } catch {
-      enqueueSnackbar("The task could not be created.", {
-        variant: "toast",
-        tone: "error",
-        title: "Something went wrong",
-      });
-    } finally {
-      setSavingTask(false);
-    }
-  };
 
   if (loading && !project) return <FullPageLoader />;
 
@@ -118,6 +133,80 @@ const ProjectDetailsPage = () => {
     );
   }
 
+  const showError = (message) =>
+    enqueueSnackbar(message, {
+      variant: "toast",
+      tone: "error",
+      title: "Something went wrong",
+    });
+
+  const openNew = () => {
+    setEditingTask(null);
+    setTaskDialogOpen(true);
+  };
+
+  const openEdit = async (task) => {
+    try {
+      setEditingTask(toTaskRow(await getTask(task.id)));
+      setTaskDialogOpen(true);
+    } catch {
+      showError("This task could not be loaded.");
+    }
+  };
+
+  const handleSaveTask = async (values) => {
+    setSavingTask(true);
+    try {
+      if (editingTask) {
+        await updateTask(editingTask.id, {
+          ...values,
+          rowVersion: editingTask.rowVersion,
+        });
+      } else {
+        await createTask({ projectId: id, ...values });
+      }
+      await afterWrite(reloadTasks);
+
+      enqueueSnackbar(
+        editingTask
+          ? `${values.title} was updated.`
+          : `${values.title} was added to ${project.name}.`,
+        {
+          variant: "toast",
+          tone: "success",
+          title: editingTask ? "Task updated" : "Task created",
+        },
+      );
+      setTaskDialogOpen(false);
+    } catch {
+      showError(
+        editingTask
+          ? "The task could not be saved."
+          : "The task could not be created.",
+      );
+    } finally {
+      setSavingTask(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteTask(toDelete.id);
+      await afterWrite(reloadTasks);
+      enqueueSnackbar(`${toDelete.title} was deleted.`, {
+        variant: "toast",
+        tone: "success",
+        title: "Task deleted",
+      });
+      setToDelete(null);
+    } catch {
+      showError(`${toDelete.title} could not be deleted.`);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const subtitle = project.description
     ? `${project.teamName} · ${project.description}`
     : project.teamName;
@@ -136,20 +225,7 @@ const ProjectDetailsPage = () => {
               ariaLabel="View"
             />
             {canCreateTask && (
-              <Button
-                variant="contained"
-                onClick={() => setTaskDialogOpen(true)}
-                sx={{
-                  textTransform: "none",
-                  backgroundColor: "#365aff",
-                  fontWeight: 500,
-                  fontSize: 14,
-                  p: "0 12px",
-                  height: "38px",
-                  borderRadius: "6px",
-                  boxShadow: 0,
-                }}
-              >
+              <Button variant="contained" onClick={openNew} sx={primaryBtn}>
                 New task
               </Button>
             )}
@@ -157,7 +233,6 @@ const ProjectDetailsPage = () => {
         }
       />
       <PageBody>
-        {" "}
         {view === "List" ? (
           <Stack spacing="32px">
             <TaskFilters
@@ -169,6 +244,8 @@ const ProjectDetailsPage = () => {
               tasks={tasks}
               loading={tasksLoading}
               canManage={canManageTasks}
+              onEdit={openEdit}
+              onDelete={setToDelete}
             />
           </Stack>
         ) : (
@@ -177,14 +254,40 @@ const ProjectDetailsPage = () => {
           </Typography>
         )}
       </PageBody>
+      <AppDialog
+        open={Boolean(toDelete)}
+        title="Delete task"
+        onClose={deleting ? undefined : () => setToDelete(null)}
+        actions={
+          <>
+            <Button
+              onClick={() => setToDelete(null)}
+              disabled={deleting}
+              sx={secondaryBtn}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={confirmDelete}
+              disabled={deleting}
+              sx={dangerBtn}
+            >
+              {deleting ? "Deleting…" : "Delete task"}
+            </Button>
+          </>
+        }
+      >
+        "{toDelete?.title}" will be deleted.
+      </AppDialog>
       <TaskDialog
         open={taskDialogOpen}
         projectName={project.name}
         teamName={project.teamName}
         members={members}
-        task={null}
+        task={editingTask}
         saving={savingTask}
-        onSave={handleCreateTask}
+        onSave={handleSaveTask}
         onClose={() => setTaskDialogOpen(false)}
       />
     </>
