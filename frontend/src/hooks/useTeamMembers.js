@@ -7,6 +7,7 @@ const useTeamMembers = (teamId) => {
   const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
+    if (!teamId) return;
     setLoading(true);
     setError(null);
     try {

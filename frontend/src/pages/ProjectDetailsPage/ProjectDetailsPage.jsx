@@ -14,6 +14,11 @@ import { useCurrentUser } from "../../context/CurrentUserContext";
 import { useBreadcrumbs } from "../../context/BreadcrumbContext";
 import { Claim, Package } from "../../constants/permissions";
 import filterTasks from "../../utils/filterTasks";
+import { useSnackbar } from "notistack";
+import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
+import useTeamMembers from "../../hooks/useTeamMembers";
+import { createTask } from "../../api/tasks";
+import afterWrite from "../../utils/afterWrite";
 
 const VIEWS = ["List", "Board"];
 const DEFAULT_FILTERS = {
@@ -27,7 +32,16 @@ const ProjectDetailsPage = () => {
   const { user, hasClaim, hasPackage } = useCurrentUser();
 
   const { project, loading, error } = useProject(id);
-  const { tasks: allTasks, loading: tasksLoading } = useProjectTasks(id);
+  const {
+    tasks: allTasks,
+    loading: tasksLoading,
+    reload: reloadTasks,
+  } = useProjectTasks(id);
+
+  const { members } = useTeamMembers(project?.teamId);
+  const { enqueueSnackbar } = useSnackbar();
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [savingTask, setSavingTask] = useState(false);
 
   const [view, setView] = useState("List");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -53,6 +67,28 @@ const ProjectDetailsPage = () => {
         ]
       : null,
   );
+
+  const handleCreateTask = async (values) => {
+    setSavingTask(true);
+    try {
+      await createTask({ projectId: id, ...values });
+      await afterWrite(reloadTasks);
+      enqueueSnackbar(`${values.title} was added to ${project.name}.`, {
+        variant: "toast",
+        tone: "success",
+        title: "Task created",
+      });
+      setTaskDialogOpen(false);
+    } catch {
+      enqueueSnackbar("The task could not be created.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    } finally {
+      setSavingTask(false);
+    }
+  };
 
   if (loading && !project) return <FullPageLoader />;
 
@@ -102,6 +138,7 @@ const ProjectDetailsPage = () => {
             {canCreateTask && (
               <Button
                 variant="contained"
+                onClick={() => setTaskDialogOpen(true)}
                 sx={{
                   textTransform: "none",
                   backgroundColor: "#365aff",
@@ -140,6 +177,16 @@ const ProjectDetailsPage = () => {
           </Typography>
         )}
       </PageBody>
+      <TaskDialog
+        open={taskDialogOpen}
+        projectName={project.name}
+        teamName={project.teamName}
+        members={members}
+        task={null}
+        saving={savingTask}
+        onSave={handleCreateTask}
+        onClose={() => setTaskDialogOpen(false)}
+      />
     </>
   );
 };
