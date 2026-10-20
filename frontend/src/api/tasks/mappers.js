@@ -1,0 +1,16 @@
+export const toTaskRow = (t) => ({
+  id: t.id,
+  projectId: t.projectId,
+  projectName: t.projectName,
+  teamId: t.teamId,
+  title: t.title,
+  description: t.description,
+  status: t.status,
+  priority: t.priority,
+  dueDate: t.dueDate,
+  isOverdue: t.isOverdue,
+  assigneeId: t.assigneeId,
+  assigneeName: t.assigneeName,
+  created: t.dateTimeCreated,
+  rowVersion: t.rowVersion,
+});

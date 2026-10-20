@@ -5,22 +5,41 @@ import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
+import TaskFilters from "../../components/organisms/TaskFilters/TaskFilters";
+import TasksTable from "../../components/organisms/TasksTable/TasksTable";
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
 import useProject from "../../hooks/useProject";
+import useProjectTasks from "../../hooks/useProjectTasks";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { useBreadcrumbs } from "../../context/BreadcrumbContext";
-import { Package } from "../../constants/permissions";
-import { Claim } from "../../constants/permissions";
+import { Claim, Package } from "../../constants/permissions";
+import filterTasks from "../../utils/filterTasks";
 
 const VIEWS = ["List", "Board"];
+const DEFAULT_FILTERS = {
+  status: "All",
+  priority: "All",
+  assignee: "Everyone",
+};
 
 const ProjectDetailsPage = () => {
   const { id } = useParams();
+  const { user, hasClaim, hasPackage } = useCurrentUser();
+
   const { project, loading, error } = useProject(id);
-  const { hasClaim, hasPackage } = useCurrentUser();
-  const canCreateTask = hasClaim(Claim.TasksCreate);
-  const canSeeTeams = hasPackage(Package.Teams);
+  const { tasks: allTasks, loading: tasksLoading } = useProjectTasks(id);
+
   const [view, setView] = useState("List");
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const canCreateTask = hasClaim(Claim.TasksCreate);
+  const canManageTasks = hasClaim(Claim.TasksManage);
+  const canSeeTeams = hasPackage(Package.Teams);
+
+  const tasks = filterTasks(allTasks, filters, user.id);
+  const countLabel = tasksLoading
+    ? "Loading…"
+    : `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`;
 
   useBreadcrumbs(
     project
@@ -37,7 +56,7 @@ const ProjectDetailsPage = () => {
 
   if (loading && !project) return <FullPageLoader />;
 
-  if (error?.response?.status === 404 || (!loading && !project && !error)) {
+  if (error?.response?.status === 404) {
     return (
       <PageBody>
         <NotFoundState
@@ -50,7 +69,7 @@ const ProjectDetailsPage = () => {
     );
   }
 
-  if (error) {
+  if (error || !project) {
     return (
       <PageBody>
         <NotFoundState
@@ -100,7 +119,27 @@ const ProjectDetailsPage = () => {
           </Stack>
         }
       />
-      <PageBody></PageBody>
+      <PageBody>
+        {" "}
+        {view === "List" ? (
+          <Stack spacing="32px">
+            <TaskFilters
+              filters={filters}
+              onChange={setFilters}
+              countLabel={countLabel}
+            />
+            <TasksTable
+              tasks={tasks}
+              loading={tasksLoading}
+              canManage={canManageTasks}
+            />
+          </Stack>
+        ) : (
+          <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
+            Board comes later in phase 7.
+          </Typography>
+        )}
+      </PageBody>
     </>
   );
 };
