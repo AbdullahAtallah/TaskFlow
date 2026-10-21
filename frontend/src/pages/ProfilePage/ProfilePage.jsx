@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PermissionsCard from "../../components/organisms/PermissionsCard/PermissionsCard";
@@ -6,17 +8,28 @@ import { useCurrentUser } from "../../context/CurrentUserContext";
 import toNames from "../../utils/toNames";
 import sortByOrder from "../../utils/sortByOrder";
 import { Package, Claim } from "../../constants/permissions";
-import { Box } from "@mui/material";
+import { getTeams } from "../../api/teams";
 
 const ProfilePage = () => {
-  const { user } = useCurrentUser();
+  const { user, hasPackage } = useCurrentUser();
+  const canSeeTeams = hasPackage(Package.Teams);
+
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    if (!canSeeTeams) return;
+    getTeams({ onlyMine: true, take: 100, sort: { field: "name", dir: "asc" } })
+      .then((r) => setTeams(r.data.map((t) => t.name)))
+      .catch(() => setTeams([]));
+  }, [canSeeTeams]);
 
   const profile = {
     name: user.displayName,
     email: user.userName,
     roles: toNames(user.roles),
-    teams: [],
+    teams,
   };
+
   return (
     <>
       <PageHeader
