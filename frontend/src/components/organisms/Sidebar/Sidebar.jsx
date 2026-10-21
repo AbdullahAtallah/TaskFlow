@@ -5,6 +5,7 @@ import NavSection from "../../molecules/NavSection/NavSection";
 import NavItem from "../../molecules/NavItem/NavItem";
 import { useCurrentUser } from "../../../context/CurrentUserContext";
 import { Package } from "../../../constants/permissions";
+import useMyTaskCount from "../../../hooks/useMyTaskCount";
 
 const sections = [
   {
@@ -32,13 +33,24 @@ const sections = [
 
 const Sidebar = () => {
   const { hasPackage, signOut } = useCurrentUser();
+  const myTaskCount = useMyTaskCount();
 
   const allowed = (entry) => !entry.pkg || hasPackage(entry.pkg);
 
   const visibleSections = sections
     .filter(allowed)
-    .map((section) => ({ ...section, items: section.items.filter(allowed) }))
+    .map((section) => ({
+      ...section,
+      items: section.items
+        .filter(allowed)
+        .map((item) =>
+          item.to === "/dashboard" && myTaskCount > 0
+            ? { ...item, count: myTaskCount }
+            : item,
+        ),
+    }))
     .filter((section) => section.items.length > 0);
+
   return (
     <Box
       component="aside"
