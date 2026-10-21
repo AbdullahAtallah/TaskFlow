@@ -2,10 +2,18 @@ import { Box, Stack, Typography } from "@mui/material";
 import PriorityChip from "../../atoms/PriorityChip/PriorityChip";
 import { Link as RouterLink } from "react-router";
 
-const TaskItem = ({ title, project, due, overdue = false, priority }) => {
+const TaskItem = ({
+  title,
+  project,
+  due,
+  overdue = false,
+  priority,
+  to = "#",
+}) => {
   return (
     <Box
       component={RouterLink}
+      to={to}
       sx={{
         display: "flex",
         alignItems: "center",

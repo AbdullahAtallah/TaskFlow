@@ -1,8 +1,12 @@
 import client from "../client";
 import gridParams from "../gridParams";
 
-export const getTeams = (options) =>
-  client.get("/team", { params: gridParams(options) }).then((r) => r.data);
+export const getTeams = ({ onlyMine, ...options } = {}) =>
+  client
+    .get("/team", {
+      params: { ...gridParams(options), ...(onlyMine && { onlyMine: true }) },
+    })
+    .then((r) => r.data);
 
 export const getTeam = (id) => client.get(`/team/${id}`).then((r) => r.data);
 

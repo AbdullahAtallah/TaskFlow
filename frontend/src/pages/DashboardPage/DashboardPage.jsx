@@ -1,107 +1,119 @@
 import { Button, Box } from "@mui/material";
+import { useNavigate } from "react-router";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import MyTasksCard from "../../components/organisms/MyTasksCard/MyTasksCard";
 import TaskStatsCard from "../../components/organisms/TaskStatsCard/TaskStatsCard";
 import ProjectsPerTeamCard from "../../components/organisms/ProjectsPerTeamCard/ProjectsPerTeamCard";
 import MyTeamsCard from "../../components/organisms/MyTeamsCard/MyTeamsCard";
+import useDashboard from "../../hooks/useDashboard";
+import { useCurrentUser } from "../../context/CurrentUserContext";
+import { Claim, Package } from "../../constants/permissions";
+import { formatDate } from "../../utils";
+
+const secondaryBtn = {
+  textTransform: "none",
+  backgroundColor: "#ffffff",
+  color: "#111827",
+  border: "1px solid #e5e7eb",
+  fontWeight: 500,
+  fontSize: 14,
+  p: "0 12px",
+  height: "38px",
+  borderRadius: "6px",
+  boxShadow: 0,
+};
+
+const primaryBtn = {
+  textTransform: "none",
+  backgroundColor: "#365aff",
+  fontWeight: 500,
+  fontSize: 14,
+  p: "0 12px",
+  height: "38px",
+  borderRadius: "6px",
+  boxShadow: 0,
+};
+
+const dueLabel = (task) => {
+  if (!task.dueDate) return "No due date";
+  if (!task.isOverdue) return formatDate(task.dueDate);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(task.dueDate);
+  due.setHours(0, 0, 0, 0);
+  const days = Math.round((today - due) / 86400000);
+  return days === 1 ? "1 day overdue" : `${days} days overdue`;
+};
+
+const toTaskItem = (task) => ({
+  id: task.id,
+  title: task.title,
+  project: task.projectName,
+  due: dueLabel(task),
+  overdue: task.isOverdue,
+  priority: task.priority,
+  to: `/projects/${task.projectId}`,
+});
+
+const toTeamBar = (row) => ({
+  id: row.teamId,
+  name: row.teamName,
+  projects: row.projectCount,
+});
 
 const DashboardPage = () => {
-  const myTasks = [
-    {
-      id: 1,
-      title: "Update access badges",
-      project: "Office move Utrecht",
-      due: "2 days overdue",
-      overdue: true,
-      priority: "High",
-    },
-    {
-      id: 2,
-      title: "Write homepage copy",
-      project: "Website relaunch",
-      due: "2 okt 2026",
-      priority: "High",
-    },
-    {
-      id: 3,
-      title: "Request quotes from installers",
-      project: "HVAC maintenance plan",
-      due: "6 okt 2026",
-      priority: "Medium",
-    },
-    {
-      id: 4,
-      title: "Label desks and lockers",
-      project: "Office move Utrecht",
-      due: "8 okt 2026",
-      priority: "Low",
-    },
-    {
-      id: 5,
-      title: "Inform staff about parking",
-      project: "Office move Utrecht",
-      due: "10 okt 2026",
-      priority: "Medium",
-    },
-    {
-      id: 6,
-      title: "Collect logo usage examples",
-      project: "Brand guidelines",
-      due: "15 okt 2026",
-      priority: "Low",
-    },
-  ];
+  const navigate = useNavigate();
 
-  const stats = { todo: 12, inProgress: 7, done: 5, overdue: 3 };
+  const { user, hasPackage, hasClaim } = useCurrentUser();
+  const canSeeTeams = hasPackage(Package.Teams);
+  const canSeeProjects = hasPackage(Package.Projects);
+  const canCreateProject = hasClaim(Claim.ProjectsCreate);
+  const canCreateTask = hasClaim(Claim.TasksCreate);
 
-  const teams = [
-    { id: 1, name: "Facilities", members: 5, projects: 3 },
-    { id: 2, name: "Marketing", members: 3, projects: 2 },
-    { id: 3, name: "IT Services", members: 3, projects: 2 },
-    { id: 4, name: "Finance", members: 2, projects: 1 },
-  ];
+  const { myTasks, myTasksTotal, statusCounts, projectsPerTeam, myTeams } =
+    useDashboard({ canSeeTeams, canSeeProjects });
 
-  const myTeams = teams.filter((team) => [1, 2].includes(team.id));
+  const firstName = (
+    user?.displayName ||
+    user?.name ||
+    user?.fullName ||
+    ""
+  ).split(" ")[0];
+  const subtitle = `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${formatDate(new Date())}`;
+
+  const stats = {
+    todo: statusCounts.toDo,
+    inProgress: statusCounts.inProgress,
+    done: statusCounts.done,
+    overdue: statusCounts.overdue,
+  };
   return (
     <>
       <PageHeader
-        title="Welcome back, Sara"
-        subtitle="6 open tasks assigned to you · 30 sep 2026"
+        title={`Welcome back, ${firstName}`}
+        subtitle={subtitle}
         actions={
           <>
-            <Button
-              variant="outlined"
-              sx={{
-                textTransform: "none",
-                backgroundColor: "#ffffff",
-                color: "#111827",
-                border: "1px solid #e5e7eb",
-                fontWeight: 500,
-                fontSize: 14,
-                p: "0 12px",
-                height: "38px",
-                borderRadius: "6px",
-                boxShadow: 0,
-              }}
-            >
-              New project
-            </Button>
-            <Button
-              variant="contained"
-              sx={{
-                textTransform: "none",
-                backgroundColor: "#365aff",
-                fontWeight: 500,
-                fontSize: 14,
-                p: "0 12px",
-                height: "38px",
-                borderRadius: "6px",
-                boxShadow: 0,
-              }}
-            >
-              New task
-            </Button>
+            {canCreateProject && (
+              <Button
+                variant="outlined"
+                sx={secondaryBtn}
+                onClick={() => navigate("/projects")}
+              >
+                New project
+              </Button>
+            )}
+            {canCreateTask && (
+              <Button
+                variant="contained"
+                sx={primaryBtn}
+                onClick={() => navigate("/projects")}
+              >
+                New task
+              </Button>
+            )}
           </>
         }
       />
@@ -114,10 +126,19 @@ const DashboardPage = () => {
             pb: "20px",
           }}
         >
-          <MyTasksCard tasks={myTasks} />
+          <MyTasksCard tasks={myTasks.map(toTaskItem)} total={myTasksTotal} />
           <TaskStatsCard stats={stats} />
-          <ProjectsPerTeamCard teams={teams} />
-          <MyTeamsCard teams={myTeams} />
+          {canSeeProjects && (
+            <ProjectsPerTeamCard
+              teams={projectsPerTeam
+                .map(toTeamBar)
+                .sort(
+                  (a, b) =>
+                    b.projects - a.projects || a.name.localeCompare(b.name),
+                )}
+            />
+          )}
+          {canSeeTeams && <MyTeamsCard teams={myTeams} />}
         </Box>
       </PageBody>
     </>
