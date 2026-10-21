@@ -18,9 +18,51 @@ const Filter = ({ label, options, value, onChange }) => (
   </Box>
 );
 
-const TaskFilters = ({ filters, onChange, countLabel }) => {
+const Count = ({ children }) => (
+  <Typography
+    sx={{
+      fontSize: "15px",
+      lineHeight: "38px",
+      color: "#6b7280",
+      whiteSpace: "nowrap",
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
   const set = (key) => (value) => onChange({ ...filters, [key]: value });
 
+  const priority = (
+    <Filter
+      label="Priority"
+      options={PRIORITY_OPTIONS}
+      value={filters.priority}
+      onChange={set("priority")}
+    />
+  );
+  const assignee = (
+    <Filter
+      label="Assignee"
+      options={ASSIGNEE_OPTIONS}
+      value={filters.assignee}
+      onChange={set("assignee")}
+    />
+  );
+
+  if (!showStatus) {
+    return (
+      <Stack
+        direction="row"
+        sx={{ alignItems: "flex-end", flexWrap: "wrap", gap: "24px" }}
+      >
+        <Box sx={{ flex: 1, minWidth: "320px" }}>{priority}</Box>
+        <Box sx={{ flex: 1, minWidth: "320px" }}>{assignee}</Box>
+        <Count>{countLabel}</Count>
+      </Stack>
+    );
+  }
   return (
     <Stack spacing="18px">
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: "24px" }}>
@@ -32,14 +74,7 @@ const TaskFilters = ({ filters, onChange, countLabel }) => {
             onChange={set("status")}
           />
         </Box>
-        <Box sx={{ flex: 1, minWidth: "320px" }}>
-          <Filter
-            label="Priority"
-            options={PRIORITY_OPTIONS}
-            value={filters.priority}
-            onChange={set("priority")}
-          />
-        </Box>
+        <Box sx={{ flex: 1, minWidth: "320px" }}>{priority}</Box>
       </Stack>
 
       <Stack
@@ -50,25 +85,10 @@ const TaskFilters = ({ filters, onChange, countLabel }) => {
           gap: "24px",
         }}
       >
-        <Filter
-          label="Assignee"
-          options={ASSIGNEE_OPTIONS}
-          value={filters.assignee}
-          onChange={set("assignee")}
-        />
-        <Typography
-          sx={{
-            fontSize: "15px",
-            lineHeight: "38px",
-            color: "#6b7280",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {countLabel}
-        </Typography>
+        {assignee}
+        <Count>{countLabel}</Count>
       </Stack>
     </Stack>
   );
 };
-
 export default TaskFilters;

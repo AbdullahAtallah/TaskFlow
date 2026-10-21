@@ -1,28 +1,34 @@
 import { useState } from "react";
 import { useParams } from "react-router";
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Stack } from "@mui/material";
+import { useSnackbar } from "notistack";
+
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
+import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import TaskFilters from "../../components/organisms/TaskFilters/TaskFilters";
 import TasksTable from "../../components/organisms/TasksTable/TasksTable";
-import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import TaskBoard from "../../components/organisms/TaskBoard/TaskBoard";
+import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
+
 import useProject from "../../hooks/useProject";
 import useProjectTasks from "../../hooks/useProjectTasks";
-import { useCurrentUser } from "../../context/CurrentUserContext";
-import { useBreadcrumbs } from "../../context/BreadcrumbContext";
-import { Claim, Package } from "../../constants/permissions";
-import filterTasks from "../../utils/filterTasks";
-import { useSnackbar } from "notistack";
-import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
+import useTaskBoard from "../../hooks/useTaskBoard";
 import useTeamMembers from "../../hooks/useTeamMembers";
 import { createTask, deleteTask, getTask, updateTask } from "../../api/tasks";
-import afterWrite from "../../utils/afterWrite";
-import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import { toTaskRow } from "../../api/tasks/mappers";
 
+import filterTasks from "../../utils/filterTasks";
+import afterWrite from "../../utils/afterWrite";
+import { useCurrentUser } from "../../context/CurrentUserContext";
+import { useBreadcrumbs } from "../../context/BreadcrumbContext";
+import { Claim, Feature, Package } from "../../constants/permissions";
+
 const VIEWS = ["List", "Board"];
+
 const DEFAULT_FILTERS = {
   status: "All",
   priority: "All",
@@ -39,6 +45,7 @@ const primaryBtn = {
   borderRadius: "6px",
   boxShadow: 0,
 };
+
 const secondaryBtn = {
   textTransform: "none",
   height: "38px",
@@ -50,6 +57,7 @@ const secondaryBtn = {
   fontWeight: 500,
   fontSize: 14,
 };
+
 const dangerBtn = {
   textTransform: "none",
   height: "38px",
@@ -64,21 +72,13 @@ const dangerBtn = {
 
 const ProjectDetailsPage = () => {
   const { id } = useParams();
-  const { user, hasClaim, hasPackage } = useCurrentUser();
+  const { user, hasClaim, hasPackage, hasFeature } = useCurrentUser();
   const { enqueueSnackbar } = useSnackbar();
-
-  const { project, loading, error } = useProject(id);
-  const {
-    tasks: allTasks,
-    loading: tasksLoading,
-    reload: reloadTasks,
-  } = useProjectTasks(id);
-  const { members } = useTeamMembers(project?.teamId);
 
   const [view, setView] = useState("List");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
+  const [editingTask, setEditingTask] = useState(null); // null = new task
   const [savingTask, setSavingTask] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -86,11 +86,39 @@ const ProjectDetailsPage = () => {
   const canCreateTask = hasClaim(Claim.TasksCreate);
   const canManageTasks = hasClaim(Claim.TasksManage);
   const canSeeTeams = hasPackage(Package.Teams);
+  const canSeeBoard =
+    hasFeature(Feature.TasksBoard) && hasClaim(Claim.TasksBoardView);
+  const onBoard = view === "Board" && canSeeBoard;
+
+  const { project, loading, error } = useProject(id);
+  const {
+    tasks: allTasks,
+    loading: tasksLoading,
+    reload: reloadTasks,
+  } = useProjectTasks(id);
+  const {
+    columns,
+    loading: boardLoading,
+    reload: reloadBoard,
+  } = useTaskBoard(id, onBoard);
+  const { members } = useTeamMembers(project?.teamId);
 
   const tasks = filterTasks(allTasks, filters, user.id);
-  const countLabel = tasksLoading
+
+  const boardColumns = columns.map((column) => ({
+    ...column,
+    tasks: filterTasks(column.tasks, { ...filters, status: "All" }, user.id),
+  }));
+  const boardCount = boardColumns.reduce(
+    (sum, column) => sum + column.tasks.length,
+    0,
+  );
+
+  const shownCount = onBoard ? boardCount : tasks.length;
+  const isLoading = onBoard ? boardLoading : tasksLoading;
+  const countLabel = isLoading
     ? "Loading…"
-    : `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}`;
+    : `${shownCount} ${shownCount === 1 ? "task" : "tasks"}`;
 
   useBreadcrumbs(
     project
@@ -140,6 +168,14 @@ const ProjectDetailsPage = () => {
       title: "Something went wrong",
     });
 
+  const showSuccess = (title, message) =>
+    enqueueSnackbar(message, { variant: "toast", tone: "success", title });
+
+  const reloadAll = async () => {
+    await reloadTasks();
+    if (onBoard) await reloadBoard();
+  };
+
   const openNew = () => {
     setEditingTask(null);
     setTaskDialogOpen(true);
@@ -155,9 +191,11 @@ const ProjectDetailsPage = () => {
   };
 
   const handleSaveTask = async (values) => {
+    const isEdit = Boolean(editingTask);
     setSavingTask(true);
+
     try {
-      if (editingTask) {
+      if (isEdit) {
         await updateTask(editingTask.id, {
           ...values,
           rowVersion: editingTask.rowVersion,
@@ -165,46 +203,43 @@ const ProjectDetailsPage = () => {
       } else {
         await createTask({ projectId: id, ...values });
       }
-      await afterWrite(reloadTasks);
-
-      enqueueSnackbar(
-        editingTask
-          ? `${values.title} was updated.`
-          : `${values.title} was added to ${project.name}.`,
-        {
-          variant: "toast",
-          tone: "success",
-          title: editingTask ? "Task updated" : "Task created",
-        },
-      );
-      setTaskDialogOpen(false);
     } catch {
       showError(
-        editingTask
+        isEdit
           ? "The task could not be saved."
           : "The task could not be created.",
       );
-    } finally {
       setSavingTask(false);
+      return;
     }
+
+    setSavingTask(false);
+    setTaskDialogOpen(false);
+    showSuccess(
+      isEdit ? "Task updated" : "Task created",
+      isEdit
+        ? `${values.title} was updated.`
+        : `${values.title} was added to ${project.name}.`,
+    );
+    await afterWrite(reloadAll);
   };
 
   const confirmDelete = async () => {
+    const task = toDelete;
     setDeleting(true);
+
     try {
-      await deleteTask(toDelete.id);
-      await afterWrite(reloadTasks);
-      enqueueSnackbar(`${toDelete.title} was deleted.`, {
-        variant: "toast",
-        tone: "success",
-        title: "Task deleted",
-      });
-      setToDelete(null);
+      await deleteTask(task.id);
     } catch {
-      showError(`${toDelete.title} could not be deleted.`);
-    } finally {
+      showError(`${task.title} could not be deleted.`);
       setDeleting(false);
+      return;
     }
+
+    setDeleting(false);
+    setToDelete(null);
+    showSuccess("Task deleted", `${task.title} was deleted.`);
+    await afterWrite(reloadAll);
   };
 
   const subtitle = project.description
@@ -218,12 +253,14 @@ const ProjectDetailsPage = () => {
         subtitle={subtitle}
         actions={
           <Stack direction="row" spacing="24px" sx={{ alignItems: "center" }}>
-            <SegmentedTabs
-              options={VIEWS}
-              value={view}
-              onChange={setView}
-              ariaLabel="View"
-            />
+            {canSeeBoard && (
+              <SegmentedTabs
+                options={VIEWS}
+                value={view}
+                onChange={setView}
+                ariaLabel="View"
+              />
+            )}
             {canCreateTask && (
               <Button variant="contained" onClick={openNew} sx={primaryBtn}>
                 New task
@@ -232,14 +269,22 @@ const ProjectDetailsPage = () => {
           </Stack>
         }
       />
+
       <PageBody>
-        {view === "List" ? (
-          <Stack spacing="32px">
-            <TaskFilters
-              filters={filters}
-              onChange={setFilters}
-              countLabel={countLabel}
+        <Stack spacing="32px">
+          <TaskFilters
+            filters={filters}
+            onChange={setFilters}
+            countLabel={countLabel}
+            showStatus={!onBoard}
+          />
+
+          {onBoard ? (
+            <TaskBoard
+              columns={boardColumns}
+              onOpen={canManageTasks ? openEdit : undefined}
             />
+          ) : (
             <TasksTable
               tasks={tasks}
               loading={tasksLoading}
@@ -247,13 +292,21 @@ const ProjectDetailsPage = () => {
               onEdit={openEdit}
               onDelete={setToDelete}
             />
-          </Stack>
-        ) : (
-          <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
-            Board comes later in phase 7.
-          </Typography>
-        )}
+          )}
+        </Stack>
       </PageBody>
+
+      <TaskDialog
+        open={taskDialogOpen}
+        projectName={project.name}
+        teamName={project.teamName}
+        members={members}
+        task={editingTask}
+        saving={savingTask}
+        onSave={handleSaveTask}
+        onClose={() => setTaskDialogOpen(false)}
+      />
+
       <AppDialog
         open={Boolean(toDelete)}
         title="Delete task"
@@ -280,16 +333,6 @@ const ProjectDetailsPage = () => {
       >
         "{toDelete?.title}" will be deleted.
       </AppDialog>
-      <TaskDialog
-        open={taskDialogOpen}
-        projectName={project.name}
-        teamName={project.teamName}
-        members={members}
-        task={editingTask}
-        saving={savingTask}
-        onSave={handleSaveTask}
-        onClose={() => setTaskDialogOpen(false)}
-      />
     </>
   );
 };

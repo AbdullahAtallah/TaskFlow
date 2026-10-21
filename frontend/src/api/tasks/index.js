@@ -16,3 +16,6 @@ export const updateTask = (id, task) =>
   client.put(`/task/${id}`, { id, ...task });
 
 export const deleteTask = (id) => client.delete(`/task/${id}`);
+
+export const getTaskBoard = (projectId) =>
+  client.get("/task/board", { params: { projectId } }).then((r) => r.data);
