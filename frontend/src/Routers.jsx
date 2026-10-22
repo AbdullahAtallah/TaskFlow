@@ -41,6 +41,10 @@ const Routers = () => {
           <Route element={<PackageGuard pkg={Package.Projects} />}>
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+            <Route
+              path="/projects/:id/board"
+              element={<ProjectDetailsPage />}
+            />
           </Route>
 
           <Route element={<PackageGuard pkg={Package.Management} />}>

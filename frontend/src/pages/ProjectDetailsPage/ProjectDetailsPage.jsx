@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useNavigate, Navigate, useParams } from "react-router";
 import { Button, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 
@@ -72,10 +72,10 @@ const dangerBtn = {
 
 const ProjectDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user, hasClaim, hasPackage, hasFeature } = useCurrentUser();
   const { enqueueSnackbar } = useSnackbar();
 
-  const [view, setView] = useState("List");
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // null = new task
@@ -88,7 +88,9 @@ const ProjectDetailsPage = () => {
   const canSeeTeams = hasPackage(Package.Teams);
   const canSeeBoard =
     hasFeature(Feature.TasksBoard) && hasClaim(Claim.TasksBoardView);
-  const onBoard = view === "Board" && canSeeBoard;
+  const { pathname } = useLocation();
+  const onBoard = pathname.endsWith("/board");
+  const view = onBoard ? "Board" : "List";
 
   const { project, loading, error } = useProject(id);
   const {
@@ -100,7 +102,7 @@ const ProjectDetailsPage = () => {
     columns,
     loading: boardLoading,
     reload: reloadBoard,
-  } = useTaskBoard(id, onBoard);
+  } = useTaskBoard(id, onBoard && canSeeBoard);
   const { members } = useTeamMembers(project?.teamId);
 
   const tasks = filterTasks(allTasks, filters, user.id);
@@ -133,6 +135,7 @@ const ProjectDetailsPage = () => {
       : null,
   );
 
+  if (onBoard && !canSeeBoard) return <Navigate to="/dashboard" replace />;
   if (loading && !project) return <FullPageLoader />;
 
   if (error?.response?.status === 404) {
@@ -257,7 +260,13 @@ const ProjectDetailsPage = () => {
               <SegmentedTabs
                 options={VIEWS}
                 value={view}
-                onChange={setView}
+                onChange={(next) =>
+                  navigate(
+                    next === "Board"
+                      ? `/projects/${id}/board`
+                      : `/projects/${id}`,
+                  )
+                }
                 ariaLabel="View"
               />
             )}
