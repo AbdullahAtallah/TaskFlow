@@ -4,9 +4,11 @@ import { Button, Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import UsersTable from "../../components/organisms/UsersTable/UsersTable";
+import NewUserDialog from "../../components/organisms/NewUserDialog/NewUserDialog";
 import useUsers from "../../hooks/useUsers";
 import { useCurrentUser } from "../../context/CurrentUserContext";
-import { updateUser } from "../../api/user";
+import { updateUser, createUser } from "../../api/user";
+import { getRoles } from "../../api/roles";
 import afterWrite from "../../utils/afterWrite";
 
 const primaryBtn = {
@@ -20,9 +22,18 @@ const primaryBtn = {
   boxShadow: 0,
 };
 
+const ROLE_ORDER = ["Admin", "User", "ReadOnlyUser"];
+const byRoleOrder = (a, b) =>
+  (ROLE_ORDER.indexOf(a.name) + 1 || 99) -
+  (ROLE_ORDER.indexOf(b.name) + 1 || 99);
+
 const UsersPage = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [busyId, setBusyId] = useState(null);
+
+  const [newOpen, setNewOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [roles, setRoles] = useState([]);
 
   const { user: me } = useCurrentUser();
   const { users, total, loading, error, reload } = useUsers();
@@ -70,13 +81,51 @@ const UsersPage = () => {
     setBusyId(null);
   };
 
+  const openNew = async () => {
+    document.activeElement?.blur();
+    try {
+      const r = await getRoles({ take: 100 });
+      setRoles([...r.data].sort(byRoleOrder));
+      setNewOpen(true);
+    } catch {
+      enqueueSnackbar("Roles could not be loaded.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+    }
+  };
+
+  const handleCreate = async (data) => {
+    setCreating(true);
+    try {
+      await createUser(data);
+    } catch {
+      enqueueSnackbar("The user could not be created.", {
+        variant: "toast",
+        tone: "error",
+        title: "Something went wrong",
+      });
+      return;
+    } finally {
+      setCreating(false);
+    }
+    setNewOpen(false);
+    enqueueSnackbar(`${data.displayName} can now sign in.`, {
+      variant: "toast",
+      tone: "success",
+      title: "User created",
+    });
+    await afterWrite(reload);
+  };
+
   return (
     <>
       <PageHeader
         title="Users"
         subtitle={subtitle}
         actions={
-          <Button variant="contained" sx={primaryBtn}>
+          <Button variant="contained" onClick={openNew} sx={primaryBtn}>
             New user
           </Button>
         }
@@ -90,6 +139,13 @@ const UsersPage = () => {
           <UsersTable users={rows} onToggleActive={toggleActive} />
         )}
       </PageBody>
+      <NewUserDialog
+        open={newOpen}
+        roles={roles}
+        saving={creating}
+        onCreate={handleCreate}
+        onClose={() => setNewOpen(false)}
+      />
     </>
   );
 };

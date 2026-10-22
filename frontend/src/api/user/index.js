@@ -9,3 +9,6 @@ export const getUsers = (options) =>
 
 export const updateUser = (id, user) =>
   client.put(`/user/${id}`, { id, ...user }).then((r) => r.data);
+
+export const createUser = (user) =>
+  client.post("/user", user).then((r) => r.data);
