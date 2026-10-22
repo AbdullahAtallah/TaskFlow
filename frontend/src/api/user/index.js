@@ -12,3 +12,8 @@ export const updateUser = (id, user) =>
 
 export const createUser = (user) =>
   client.post("/user", user).then((r) => r.data);
+
+export const setUserPassword = (id, password) =>
+  client
+    .put(`/user/${id}/password`, { userId: id, password })
+    .then((r) => r.data);

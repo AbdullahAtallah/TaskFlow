@@ -6,7 +6,7 @@ import Tag from "../../atoms/Tag/Tag";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import UserNameCell from "../../molecules/UserNameCell/UserNameCell";
 
-const UsersTable = ({ users, onToggleActive }) => {
+const UsersTable = ({ users, onToggleActive, onSetPassword }) => {
   return (
     <Box
       sx={{
@@ -19,14 +19,14 @@ const UsersTable = ({ users, onToggleActive }) => {
       <Table sx={{ tableLayout: "fixed", minWidth: "1000px" }}>
         <TableHead>
           <TableRow>
-            <HeadCell width="24%">
+            <HeadCell width="22%">
               <SortLabel active>Name</SortLabel>
             </HeadCell>
-            <HeadCell width="20%">E-mail</HeadCell>
-            <HeadCell width="14%">Roles</HeadCell>
-            <HeadCell width="19%">Teams</HeadCell>
-            <HeadCell width="12%">Status</HeadCell>
-            <HeadCell width="11%" />
+            <HeadCell width="19%">E-mail</HeadCell>
+            <HeadCell width="13%">Roles</HeadCell>
+            <HeadCell width="17%">Teams</HeadCell>
+            <HeadCell width="10%">Status</HeadCell>
+            <HeadCell width="19%" />
           </TableRow>
         </TableHead>
 
@@ -58,11 +58,22 @@ const UsersTable = ({ users, onToggleActive }) => {
                 )}
               </BodyCell>
               <BodyCell>
-                {!user.isMe && (
-                  <TextLink onClick={() => onToggleActive(user.id)}>
-                    {user.active ? "Deactivate" : "Activate"}
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: "16px",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <TextLink onClick={() => onSetPassword(user)}>
+                    Set password
                   </TextLink>
-                )}
+                  {!user.isMe && (
+                    <TextLink onClick={() => onToggleActive(user.id)}>
+                      {user.active ? "Deactivate" : "Activate"}
+                    </TextLink>
+                  )}
+                </Box>
               </BodyCell>
             </TableRow>
           ))}

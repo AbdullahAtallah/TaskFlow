@@ -5,9 +5,10 @@ import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import UsersTable from "../../components/organisms/UsersTable/UsersTable";
 import NewUserDialog from "../../components/organisms/NewUserDialog/NewUserDialog";
+import SetPasswordDialog from "../../components/organisms/SetPasswordDialog/SetPasswordDialog";
 import useUsers from "../../hooks/useUsers";
 import { useCurrentUser } from "../../context/CurrentUserContext";
-import { updateUser, createUser } from "../../api/user";
+import { updateUser, createUser, setUserPassword } from "../../api/user";
 import { getRoles } from "../../api/roles";
 import afterWrite from "../../utils/afterWrite";
 
@@ -35,7 +36,10 @@ const UsersPage = () => {
   const [creating, setCreating] = useState(false);
   const [roles, setRoles] = useState([]);
 
-  const { user: me } = useCurrentUser();
+  const [passwordUser, setPasswordUser] = useState(null);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const { user: me, signOut } = useCurrentUser();
   const { users, total, loading, error, reload } = useUsers();
 
   const rows = users
@@ -119,6 +123,44 @@ const UsersPage = () => {
     await afterWrite(reload);
   };
 
+  const handleSetPassword = async (password) => {
+    setSavingPassword(true);
+    try {
+      await setUserPassword(passwordUser.id, password);
+    } catch {
+      enqueueSnackbar(
+        `The password for ${passwordUser.name} could not be set.`,
+        {
+          variant: "toast",
+          tone: "error",
+          title: "Something went wrong",
+        },
+      );
+      return;
+    } finally {
+      if (passwordUser.isMe) {
+        setPasswordUser(null);
+        enqueueSnackbar("Sign in again with your new password.", {
+          variant: "toast",
+          tone: "success",
+          title: "Password changed",
+        });
+        signOut();
+        return;
+      }
+
+      enqueueSnackbar(
+        `${passwordUser.name} can sign in with the new password.`,
+        {
+          variant: "toast",
+          tone: "success",
+          title: "Password set",
+        },
+      );
+      setPasswordUser(null);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -136,7 +178,11 @@ const UsersPage = () => {
             Could not load users. Please try again.
           </Typography>
         ) : (
-          <UsersTable users={rows} onToggleActive={toggleActive} />
+          <UsersTable
+            users={rows}
+            onToggleActive={toggleActive}
+            onSetPassword={setPasswordUser}
+          />
         )}
       </PageBody>
       <NewUserDialog
@@ -145,6 +191,13 @@ const UsersPage = () => {
         saving={creating}
         onCreate={handleCreate}
         onClose={() => setNewOpen(false)}
+      />
+      <SetPasswordDialog
+        open={Boolean(passwordUser)}
+        userName={passwordUser?.name}
+        saving={savingPassword}
+        onSave={handleSetPassword}
+        onClose={() => setPasswordUser(null)}
       />
     </>
   );
