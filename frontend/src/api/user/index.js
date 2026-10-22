@@ -6,3 +6,6 @@ export const getCurrentUser = () =>
 
 export const getUsers = (options) =>
   client.get("/user", { params: gridParams(options) }).then((res) => res.data);
+
+export const updateUser = (id, user) =>
+  client.put(`/user/${id}`, { id, ...user }).then((r) => r.data);
