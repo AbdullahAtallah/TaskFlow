@@ -43,9 +43,13 @@ const UsersTable = ({ users, onToggleActive }) => {
               </BodyCell>
               <BodyCell>{user.email}</BodyCell>
               <BodyCell>
-                <Tag>{user.role}</Tag>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {user.roles.map((role) => (
+                    <Tag key={role}>{role}</Tag>
+                  ))}
+                </Box>
               </BodyCell>
-              <BodyCell>{user.teams}</BodyCell>
+              <BodyCell>{user.teams || "—"}</BodyCell>
               <BodyCell>
                 {user.active ? (
                   <Tag tone="success">Active</Tag>
