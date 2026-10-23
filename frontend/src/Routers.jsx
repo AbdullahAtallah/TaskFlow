@@ -16,6 +16,7 @@ import UsersPage from "./pages/UsersPage/UsersPage";
 import RolesPage from "./pages/RolesPage/RolesPage";
 import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import ProjectDetailsPage from "./pages/ProjectDetailsPage/ProjectDetailsPage";
+import RoleDetailsPage from "./pages/RoleDetailsPage/RoleDetailsPage";
 
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 
@@ -50,6 +51,7 @@ const Routers = () => {
           <Route element={<PackageGuard pkg={Package.Management} />}>
             <Route path="/management/users" element={<UsersPage />} />
             <Route path="/management/roles" element={<RolesPage />} />
+            <Route path="management/roles/:id" element=<RoleDetailsPage /> />
           </Route>
         </Route>
       </Route>
