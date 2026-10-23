@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate, Navigate, useParams } from "react-router";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
@@ -83,11 +83,14 @@ const ProjectDetailsPage = () => {
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const canCreateTask = hasClaim(Claim.TasksCreate);
-  const canManageTasks = hasClaim(Claim.TasksManage);
+  const canSeeTasks = hasPackage(Package.Tasks);
+  const canCreateTask = canSeeTasks && hasClaim(Claim.TasksCreate);
+  const canManageTasks = canSeeTasks && hasClaim(Claim.TasksManage);
   const canSeeTeams = hasPackage(Package.Teams);
   const canSeeBoard =
-    hasFeature(Feature.TasksBoard) && hasClaim(Claim.TasksBoardView);
+    canSeeTasks &&
+    hasFeature(Feature.TasksBoard) &&
+    hasClaim(Claim.TasksBoardView);
   const { pathname } = useLocation();
   const onBoard = pathname.endsWith("/board");
   const view = onBoard ? "Board" : "List";
@@ -97,7 +100,7 @@ const ProjectDetailsPage = () => {
     tasks: allTasks,
     loading: tasksLoading,
     reload: reloadTasks,
-  } = useProjectTasks(id);
+  } = useProjectTasks(id, canSeeTasks);
   const {
     columns,
     loading: boardLoading,
@@ -280,29 +283,35 @@ const ProjectDetailsPage = () => {
       />
 
       <PageBody>
-        <Stack spacing="32px">
-          <TaskFilters
-            filters={filters}
-            onChange={setFilters}
-            countLabel={countLabel}
-            showStatus={!onBoard}
-          />
+        {!canSeeTasks ? (
+          <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
+            You don't have access to tasks.
+          </Typography>
+        ) : (
+          <Stack spacing="32px">
+            <TaskFilters
+              filters={filters}
+              onChange={setFilters}
+              countLabel={countLabel}
+              showStatus={!onBoard}
+            />
 
-          {onBoard ? (
-            <TaskBoard
-              columns={boardColumns}
-              onOpen={canManageTasks ? openEdit : undefined}
-            />
-          ) : (
-            <TasksTable
-              tasks={tasks}
-              loading={tasksLoading}
-              canManage={canManageTasks}
-              onEdit={openEdit}
-              onDelete={setToDelete}
-            />
-          )}
-        </Stack>
+            {onBoard ? (
+              <TaskBoard
+                columns={boardColumns}
+                onOpen={canManageTasks ? openEdit : undefined}
+              />
+            ) : (
+              <TasksTable
+                tasks={tasks}
+                loading={tasksLoading}
+                canManage={canManageTasks}
+                onEdit={openEdit}
+                onDelete={setToDelete}
+              />
+            )}
+          </Stack>
+        )}
       </PageBody>
 
       <TaskDialog
