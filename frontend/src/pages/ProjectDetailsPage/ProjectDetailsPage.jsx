@@ -91,6 +91,8 @@ const ProjectDetailsPage = () => {
     canSeeTasks &&
     hasFeature(Feature.TasksBoard) &&
     hasClaim(Claim.TasksBoardView);
+  const canAssign = hasClaim(Claim.TasksAssign);
+
   const { pathname } = useLocation();
   const onBoard = pathname.endsWith("/board");
   const view = onBoard ? "Board" : "List";
@@ -322,6 +324,7 @@ const ProjectDetailsPage = () => {
         task={editingTask}
         saving={savingTask}
         onSave={handleSaveTask}
+        canAssign={canAssign}
         onClose={() => setTaskDialogOpen(false)}
       />
 

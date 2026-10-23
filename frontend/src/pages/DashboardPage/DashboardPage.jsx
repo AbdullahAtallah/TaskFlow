@@ -92,6 +92,7 @@ const DashboardPage = () => {
   const canCreateProject = hasClaim(Claim.ProjectsCreate);
   const canSeeTasks = hasPackage(Package.Tasks);
   const canCreateTask = canSeeTasks && hasClaim(Claim.TasksCreate);
+  const canAssign = hasClaim(Claim.TasksAssign);
 
   const {
     myTasks,
@@ -269,6 +270,7 @@ const DashboardPage = () => {
         members={members ?? []}
         saving={saving}
         onSave={handleCreateTask}
+        canAssign={canAssign}
         onClose={closeDialog}
       />
     </>

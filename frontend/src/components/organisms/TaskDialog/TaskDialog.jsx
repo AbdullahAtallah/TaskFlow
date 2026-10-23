@@ -76,8 +76,9 @@ const TaskDialog = ({
   saving,
   onSave,
   onClose,
-  projects, // only on the dashboard: shows the Project dropdown
-  onProjectChange, // tells the page which project is chosen (to load its members)
+  projects,
+  onProjectChange,
+  canAssign = true,
 }) => {
   const pickProject = Array.isArray(projects);
 
@@ -300,6 +301,19 @@ const TaskDialog = ({
             <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
               Choose a project first.
             </Typography>
+          ) : !canAssign ? (
+            <>
+              <Typography sx={{ fontSize: "14px", color: "#111827" }}>
+                {members.find((m) => m.userId === assigneeId)?.displayName ??
+                  task?.assigneeName ??
+                  "Unassigned"}
+              </Typography>
+              <Typography
+                sx={{ mt: "4px", fontSize: "13px", color: "#9ca3af" }}
+              >
+                You don't have permission to assign tasks.
+              </Typography>
+            </>
           ) : members.length === 0 ? (
             <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
               This team has no members yet.
