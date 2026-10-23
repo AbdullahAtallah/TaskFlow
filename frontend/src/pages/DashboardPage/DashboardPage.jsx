@@ -90,7 +90,8 @@ const DashboardPage = () => {
   const canSeeTeams = hasPackage(Package.Teams);
   const canSeeProjects = hasPackage(Package.Projects);
   const canCreateProject = hasClaim(Claim.ProjectsCreate);
-  const canCreateTask = hasClaim(Claim.TasksCreate);
+  const canSeeTasks = hasPackage(Package.Tasks);
+  const canCreateTask = canSeeTasks && hasClaim(Claim.TasksCreate);
 
   const {
     myTasks,
@@ -99,13 +100,15 @@ const DashboardPage = () => {
     projectsPerTeam,
     myTeams,
     reload,
-  } = useDashboard({ canSeeTeams, canSeeProjects });
+  } = useDashboard({ canSeeTeams, canSeeProjects, canSeeTasks });
 
   const taskProject = projects.find((p) => p.id === taskProjectId);
   const { members } = useTeamMembers(taskProject?.teamId);
 
   const firstName = (user?.displayName || "").split(" ")[0];
-  const subtitle = `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${formatDate(new Date())}`;
+  const subtitle = canSeeTasks
+    ? `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${formatDate(new Date())}`
+    : formatDate(new Date());
 
   const stats = {
     todo: statusCounts.toDo,
@@ -242,8 +245,10 @@ const DashboardPage = () => {
             pb: "20px",
           }}
         >
-          <MyTasksCard tasks={myTasks.map(toTaskItem)} total={myTasksTotal} />
-          <TaskStatsCard stats={stats} />
+          {canSeeTasks && (
+            <MyTasksCard tasks={myTasks.map(toTaskItem)} total={myTasksTotal} />
+          )}
+          {canSeeTasks && <TaskStatsCard stats={stats} />}
           {canSeeProjects && <ProjectsPerTeamCard teams={teamBars} />}
           {canSeeTeams && <MyTeamsCard teams={myTeams} />}
         </Box>

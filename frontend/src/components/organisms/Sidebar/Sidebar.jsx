@@ -33,8 +33,7 @@ const sections = [
 
 const Sidebar = () => {
   const { hasPackage, signOut } = useCurrentUser();
-  const myTaskCount = useMyTaskCount();
-
+  const myTaskCount = useMyTaskCount(hasPackage(Package.Tasks));
   const allowed = (entry) => !entry.pkg || hasPackage(entry.pkg);
 
   const visibleSections = sections

@@ -16,7 +16,7 @@ const EMPTY = {
   myTeams: [],
 };
 
-const useDashboard = ({ canSeeTeams, canSeeProjects }) => {
+const useDashboard = ({ canSeeTeams, canSeeProjects, canSeeTasks }) => {
   const [data, setData] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +24,10 @@ const useDashboard = ({ canSeeTeams, canSeeProjects }) => {
     setLoading(true);
 
     const [myTasks, counts, perTeam, teams] = await Promise.allSettled([
-      getMyTasks({ take: 10, sort: { field: "dueDate", dir: "asc" } }),
-      getStatusCounts(),
+      canSeeTasks
+        ? getMyTasks({ take: 10, sort: { field: "dueDate", dir: "asc" } })
+        : Promise.resolve({ data: [], total: 0 }),
+      canSeeTasks ? getStatusCounts() : Promise.resolve(EMPTY.statusCounts),
       canSeeProjects ? getProjectCountsPerTeam() : Promise.resolve([]),
       canSeeTeams
         ? getTeams({
@@ -39,23 +41,25 @@ const useDashboard = ({ canSeeTeams, canSeeProjects }) => {
     setData((prev) => ({
       myTasks:
         myTasks.status === "fulfilled"
-          ? myTasks.value.data.map(toTaskRow)
+          ? (myTasks.value.data ?? []).map(toTaskRow)
           : prev.myTasks,
       myTasksTotal:
         myTasks.status === "fulfilled"
-          ? myTasks.value.total
+          ? (myTasks.value.total ?? 0)
           : prev.myTasksTotal,
       statusCounts:
         counts.status === "fulfilled" ? counts.value : prev.statusCounts,
       projectsPerTeam:
-        perTeam.status === "fulfilled" ? perTeam.value : prev.projectsPerTeam,
+        perTeam.status === "fulfilled"
+          ? (perTeam.value ?? [])
+          : prev.projectsPerTeam,
       myTeams:
         teams.status === "fulfilled"
-          ? teams.value.data.map(toTeamRow)
+          ? (teams.value.data ?? []).map(toTeamRow)
           : prev.myTeams,
     }));
     setLoading(false);
-  }, [canSeeTeams, canSeeProjects]);
+  }, [canSeeTeams, canSeeProjects, canSeeTasks]);
 
   useEffect(() => {
     load();
