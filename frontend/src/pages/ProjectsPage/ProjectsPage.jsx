@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
-import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
+import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import ProjectsTable from "../../components/organisms/ProjectsTable/ProjectsTable";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";

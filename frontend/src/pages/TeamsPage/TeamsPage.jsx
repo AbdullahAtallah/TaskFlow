@@ -3,7 +3,7 @@ import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import TextField from "../../components/molecules/TextField/TextField";
 import TeamsTable from "../../components/organisms/TeamsTable/TeamsTable";
-import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar ";
+import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import NewTeamDialog from "../../components/organisms/NewTeamDialog/NewTeamDialog";
 import useTeams from "../../hooks/useTeams";
