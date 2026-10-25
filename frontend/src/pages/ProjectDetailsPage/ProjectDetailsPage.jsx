@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate, Navigate, useParams } from "react-router";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
@@ -8,6 +8,7 @@ import PageBody from "../../components/atoms/PageBody/PageBody";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import AppButton from "../../components/atoms/AppButton/AppButton";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import TaskFilters from "../../components/organisms/TaskFilters/TaskFilters";
 import TasksTable from "../../components/organisms/TasksTable/TasksTable";
@@ -33,41 +34,6 @@ const DEFAULT_FILTERS = {
   status: "All",
   priority: "All",
   assignee: "Everyone",
-};
-
-const primaryBtn = {
-  textTransform: "none",
-  backgroundColor: "#365aff",
-  fontWeight: 500,
-  fontSize: 14,
-  p: "0 12px",
-  height: "38px",
-  borderRadius: "6px",
-  boxShadow: 0,
-};
-
-const secondaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  fontWeight: 500,
-  fontSize: 14,
-};
-
-const dangerBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  backgroundColor: "#dc2626",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-  "&:hover": { backgroundColor: "#b91c1c", boxShadow: 0 },
 };
 
 const ProjectDetailsPage = () => {
@@ -275,11 +241,7 @@ const ProjectDetailsPage = () => {
                 ariaLabel="View"
               />
             )}
-            {canCreateTask && (
-              <Button variant="contained" onClick={openNew} sx={primaryBtn}>
-                New task
-              </Button>
-            )}
+            {canCreateTask && <AppButton onClick={openNew}>New task</AppButton>}
           </Stack>
         }
       />
@@ -334,21 +296,20 @@ const ProjectDetailsPage = () => {
         onClose={deleting ? undefined : () => setToDelete(null)}
         actions={
           <>
-            <Button
+            <AppButton
+              variant="secondary"
               onClick={() => setToDelete(null)}
               disabled={deleting}
-              sx={secondaryBtn}
             >
               Cancel
-            </Button>
-            <Button
-              variant="contained"
+            </AppButton>
+            <AppButton
+              variant="danger"
               onClick={confirmDelete}
               disabled={deleting}
-              sx={dangerBtn}
             >
               {deleting ? "Deleting…" : "Delete task"}
-            </Button>
+            </AppButton>
           </>
         }
       >

@@ -1,7 +1,8 @@
-import { Divider, Stack, Button } from "@mui/material";
+import { Divider, Stack } from "@mui/material";
 import Card from "../../atoms/Card/Card";
 import ProfileIdentity from "../../molecules/ProfileIdentity/ProfileIdentity";
 import TagGroup from "../../molecules/TagGroup/TagGroup";
+import AppButton from "../../atoms/AppButton/AppButton";
 import { useCurrentUser } from "../../../context/CurrentUserContext";
 
 const ProfileCard = ({ user }) => {
@@ -25,23 +26,9 @@ const ProfileCard = ({ user }) => {
         </Stack>
 
         <Stack direction="row">
-          <Button
-            onClick={signOut}
-            sx={{
-              textTransform: "none",
-              backgroundColor: "#ffffff",
-              color: "#111827",
-              border: "1px solid #e5e7eb",
-              fontWeight: 500,
-              fontSize: 14,
-              p: "0 12px",
-              height: "38px",
-              borderRadius: "6px",
-              boxShadow: 0,
-            }}
-          >
+          <AppButton variant="secondary" onClick={signOut}>
             Sign out
-          </Button>
+          </AppButton>
         </Stack>
       </Stack>
     </Card>

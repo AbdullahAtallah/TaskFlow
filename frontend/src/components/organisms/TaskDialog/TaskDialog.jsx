@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, MenuItem, Select, Stack, Typography } from "@mui/material";
 import AppDialog from "../AppDialog/AppDialog";
 import FieldLabel from "../../atoms/FieldLabel/FieldLabel";
 import TextField from "../../molecules/TextField/TextField";
 import SegmentedTabs from "../../molecules/SegmentedTabs/SegmentedTabs";
 import AssigneeChip from "../../molecules/AssigneeChip/AssigneeChip";
+import AppButton from "../../atoms/AppButton/AppButton";
+
 import { parseDate } from "../../../utils/parseDate";
 import { formatDate } from "../../../utils";
 
@@ -19,27 +14,6 @@ const STATUS = { "To do": "ToDo", "In progress": "InProgress", Done: "Done" };
 const STATUS_LABEL = { ToDo: "To do", InProgress: "In progress", Done: "Done" };
 const PRIORITIES = ["Low", "Medium", "High"];
 
-const secondaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  fontWeight: 500,
-  fontSize: 14,
-};
-const primaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  backgroundColor: "#365aff",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-};
 const selectSx = (hasError) => ({
   width: "100%",
   height: "38px",
@@ -165,17 +139,12 @@ const TaskDialog = ({
       onClose={saving ? undefined : onClose}
       actions={
         <>
-          <Button onClick={onClose} disabled={saving} sx={secondaryBtn}>
+          <AppButton variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={saving}
-            sx={primaryBtn}
-          >
+          </AppButton>
+          <AppButton onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : isEdit ? "Save" : "Create task"}
-          </Button>
+          </AppButton>
         </>
       }
     >

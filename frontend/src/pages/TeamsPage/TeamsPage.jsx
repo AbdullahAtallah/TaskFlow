@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import TextField from "../../components/molecules/TextField/TextField";
@@ -6,6 +6,7 @@ import TeamsTable from "../../components/organisms/TeamsTable/TeamsTable";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import NewTeamDialog from "../../components/organisms/NewTeamDialog/NewTeamDialog";
+import AppButton from "../../components/atoms/AppButton/AppButton";
 import useTeams from "../../hooks/useTeams";
 import useDebouncedValue from "../../hooks/useDebouncedValue";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -15,42 +16,6 @@ import { useSnackbar } from "notistack";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import afterWrite from "../../utils/afterWrite";
-
-const secondaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  fontWeight: 500,
-  fontSize: 14,
-};
-
-const primaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  backgroundColor: "#365aff",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-  "&:hover": { boxShadow: 0 },
-};
-
-const dangerBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  backgroundColor: "#dc2626",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-  "&:hover": { backgroundColor: "#b91c1c", boxShadow: 0 },
-};
 
 const TeamsPage = () => {
   const navigate = useNavigate();
@@ -146,22 +111,7 @@ const TeamsPage = () => {
         subtitle="All teams in the organisation"
         actions={
           canManage && (
-            <Button
-              variant="contained"
-              onClick={() => setNewTeamOpen(true)}
-              sx={{
-                textTransform: "none",
-                backgroundColor: "#365aff",
-                fontWeight: 500,
-                fontSize: 14,
-                p: "0 12px",
-                height: "38px",
-                borderRadius: "6px",
-                boxShadow: 0,
-              }}
-            >
-              New team
-            </Button>
+            <AppButton onClick={() => setNewTeamOpen(true)}>New team</AppButton>
           )
         }
       />
@@ -201,21 +151,20 @@ const TeamsPage = () => {
         onClose={deleting ? undefined : () => setToDelete(null)}
         actions={
           <>
-            <Button
+            <AppButton
+              variant="secondary"
               onClick={() => setToDelete(null)}
               disabled={deleting}
-              sx={secondaryBtn}
             >
               Cancel
-            </Button>
-            <Button
-              variant="contained"
+            </AppButton>
+            <AppButton
+              variant="danger"
               onClick={confirmDelete}
               disabled={deleting}
-              sx={dangerBtn}
             >
               {deleting ? "Deleting…" : "Delete team"}
-            </Button>
+            </AppButton>
           </>
         }
       >
@@ -229,16 +178,10 @@ const TeamsPage = () => {
         onClose={() => setBlockedTeam(null)}
         actions={
           <>
-            <Button onClick={() => setBlockedTeam(null)} sx={secondaryBtn}>
+            <AppButton variant="secondary" onClick={() => setBlockedTeam(null)}>
               Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => setBlockedTeam(null)}
-              sx={primaryBtn}
-            >
-              Close
-            </Button>
+            </AppButton>
+            <AppButton onClick={() => setBlockedTeam(null)}>Close</AppButton>
           </>
         }
       >

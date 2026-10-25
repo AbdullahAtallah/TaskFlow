@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import TeamMembersTable from "../TeamMembersTable/TeamMembersTable";
 import AddMembersDialog from "../AddMembersDialog/AddMembersDialog";
+import AppButton from "../../atoms/AppButton/AppButton";
+
 import useTeamMembers from "../../../hooks/useTeamMembers";
 import { addTeamMembers, removeTeamMember } from "../../../api/teams";
 import afterWrite from "../../../utils/afterWrite";
@@ -88,22 +90,9 @@ const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
         </Typography>
 
         {canManage && (
-          <Button
-            onClick={() => setDialogOpen(true)}
-            sx={{
-              textTransform: "none",
-              height: "38px",
-              px: "14px",
-              borderRadius: "6px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              color: "#111827",
-              fontWeight: 500,
-              fontSize: 14,
-            }}
-          >
+          <AppButton variant="secondary" onClick={() => setDialogOpen(true)}>
             Add members
-          </Button>
+          </AppButton>
         )}
       </Stack>
 

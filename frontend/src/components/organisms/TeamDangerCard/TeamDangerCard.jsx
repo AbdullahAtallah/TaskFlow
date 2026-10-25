@@ -1,5 +1,6 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import Card from "../../atoms/Card/Card";
+import AppButton from "../../atoms/AppButton/AppButton";
 
 const TeamDangerCard = ({ team, deleting, onDelete }) => {
   const blocked = team.projects > 0;
@@ -36,25 +37,16 @@ const TeamDangerCard = ({ team, deleting, onDelete }) => {
               : "This permanently deletes the team. Members keep their accounts."}
           </Typography>
         </Box>
-        <Button
-          variant="contained"
+        <AppButton
+          variant="danger"
           onClick={onDelete}
           disabled={blocked || deleting}
           sx={{
-            flexShrink: 0,
-            textTransform: "none",
-            height: "38px",
-            px: "14px",
-            borderRadius: "6px",
-            backgroundColor: "#dc2626",
-            boxShadow: 0,
-            fontWeight: 500,
-            fontSize: 14,
             "&.Mui-disabled": { backgroundColor: "#f4b7bc", color: "#ffffff" },
           }}
         >
           {deleting ? "Deleting…" : "Delete team"}
-        </Button>
+        </AppButton>
       </Stack>
     </Card>
   );

@@ -1,4 +1,5 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
+import AppButton from "../../atoms/AppButton/AppButton";
 
 const UnsavedChangesBar = ({ saving, onDiscard, onSave }) => (
   <Stack
@@ -18,41 +19,12 @@ const UnsavedChangesBar = ({ saving, onDiscard, onSave }) => (
     >
       You have unsaved changes.
     </Typography>
-    <Button
-      onClick={onDiscard}
-      disabled={saving}
-      sx={{
-        textTransform: "none",
-        height: "38px",
-        px: "14px",
-        borderRadius: "6px",
-        border: "1px solid #e5e7eb",
-        backgroundColor: "#ffffff",
-        color: "#111827",
-        fontWeight: 500,
-        fontSize: 14,
-      }}
-    >
+    <AppButton variant="secondary" onClick={onDiscard} disabled={saving}>
       Discard
-    </Button>
-    <Button
-      variant="contained"
-      onClick={onSave}
-      disabled={saving}
-      sx={{
-        textTransform: "none",
-        height: "38px",
-        px: "14px",
-        borderRadius: "6px",
-        backgroundColor: "#365aff",
-        boxShadow: 0,
-        fontWeight: 500,
-        fontSize: 14,
-        "&:hover": { boxShadow: 0 },
-      }}
-    >
+    </AppButton>
+    <AppButton onClick={onSave} disabled={saving}>
       {saving ? "Saving…" : "Save"}
-    </Button>
+    </AppButton>
   </Stack>
 );
 

@@ -1,4 +1,4 @@
-import { Box, Button, Link, Typography, Stack } from "@mui/material";
+import { Box, Link, Typography, Stack } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router";
 
 import TextField from "../../molecules/TextField/TextField";
@@ -7,8 +7,9 @@ import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
 import AlertBanner from "../../atoms/AlertBanner/AlertBanner";
 import FormField from "../../molecules/FormField/FormField";
-import { useCurrentUser } from "../../../context/CurrentUserContext";
+import AppButton from "../../atoms/AppButton/AppButton";
 
+import { useCurrentUser } from "../../../context/CurrentUserContext";
 import { useState } from "react";
 import { useSnackbar } from "notistack";
 
@@ -182,21 +183,9 @@ const CreateAccountForm = () => {
             flexWrap: "wrap",
           }}
         >
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{
-              textTransform: "none",
-              fontSize: "14",
-              fontWeight: 500,
-              height: "38px",
-              p: "0px 12px",
-              borderRadius: "6px",
-              backgroundColor: "#365aff",
-            }}
-          >
+          <AppButton type="submit">
             {submitting ? "Creating account…" : "Create account"}
-          </Button>
+          </AppButton>
 
           <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
             Have an account?{" "}

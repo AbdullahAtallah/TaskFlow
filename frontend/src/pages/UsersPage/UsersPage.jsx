@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useSnackbar } from "notistack";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
+import AppButton from "../../components/atoms/AppButton/AppButton";
 import UsersTable from "../../components/organisms/UsersTable/UsersTable";
 import NewUserDialog from "../../components/organisms/NewUserDialog/NewUserDialog";
 import SetPasswordDialog from "../../components/organisms/SetPasswordDialog/SetPasswordDialog";
@@ -11,17 +12,6 @@ import { useCurrentUser } from "../../context/CurrentUserContext";
 import { updateUser, createUser, setUserPassword } from "../../api/user";
 import { getRoles } from "../../api/roles";
 import afterWrite from "../../utils/afterWrite";
-
-const primaryBtn = {
-  textTransform: "none",
-  backgroundColor: "#365aff",
-  fontWeight: 500,
-  fontSize: 14,
-  p: "0 12px",
-  height: "38px",
-  borderRadius: "6px",
-  boxShadow: 0,
-};
 
 const ROLE_ORDER = ["Admin", "User", "ReadOnlyUser"];
 const byRoleOrder = (a, b) =>
@@ -166,11 +156,7 @@ const UsersPage = () => {
       <PageHeader
         title="Users"
         subtitle={subtitle}
-        actions={
-          <Button variant="contained" onClick={openNew} sx={primaryBtn}>
-            New user
-          </Button>
-        }
+        actions={<AppButton onClick={openNew}>New user</AppButton>}
       />
       <PageBody>
         {error ? (

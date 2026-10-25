@@ -1,30 +1,9 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import AppDialog from "../AppDialog/AppDialog";
 import FieldLabel from "../../atoms/FieldLabel/FieldLabel";
 import TextField from "../../molecules/TextField/TextField";
-
-const secondaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  fontWeight: 500,
-  fontSize: 14,
-};
-const primaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "14px",
-  borderRadius: "6px",
-  backgroundColor: "#365aff",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-};
+import AppButton from "../../atoms/AppButton/AppButton";
 
 const SetPasswordDialog = ({ open, userName, saving, onSave, onClose }) => {
   const [password, setPassword] = useState("");
@@ -59,17 +38,12 @@ const SetPasswordDialog = ({ open, userName, saving, onSave, onClose }) => {
       onClose={saving ? undefined : onClose}
       actions={
         <>
-          <Button onClick={onClose} disabled={saving} sx={secondaryBtn}>
+          <AppButton variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={saving}
-            sx={primaryBtn}
-          >
+          </AppButton>
+          <AppButton variant="contained" onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Set password"}
-          </Button>
+          </AppButton>
         </>
       }
     >

@@ -1,35 +1,14 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import AppDialog from "../AppDialog/AppDialog";
 import WizardSteps from "../../molecules/WizardSteps/WizardSteps";
 import SelectableUserRow from "../../molecules/SelectableUserRow/SelectableUserRow";
 import FieldLabel from "../../atoms/FieldLabel/FieldLabel";
 import TextField from "../../molecules/TextField/TextField";
+import AppButton from "../../atoms/AppButton/AppButton";
 import { getUsers } from "../../../api/user";
 
 const STEPS = ["Details", "Members", "Summary"];
-
-const secondaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "12px",
-  borderRadius: "6px",
-  border: "1px solid #e5e7eb",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  fontWeight: 500,
-  fontSize: 14,
-};
-const primaryBtn = {
-  textTransform: "none",
-  height: "38px",
-  px: "12px",
-  borderRadius: "6px",
-  backgroundColor: "#365aff",
-  boxShadow: 0,
-  fontWeight: 500,
-  fontSize: 14,
-};
 
 const SummaryRow = ({ label, value }) => (
   <Stack direction="row">
@@ -91,29 +70,28 @@ const NewTeamDialog = ({ open, currentUserId, saving, onCreate, onClose }) => {
   const actions =
     step === 0 ? (
       <>
-        <Button onClick={onClose} sx={secondaryBtn}>
+        <AppButton variant="secondary" onClick={onClose}>
           Cancel
-        </Button>
-        <Button variant="contained" onClick={goNext} sx={primaryBtn}>
-          Next
-        </Button>
+        </AppButton>
+        <AppButton onClick={goNext}>Next</AppButton>
       </>
     ) : step === 1 ? (
       <>
-        <Button onClick={() => setStep(0)} sx={secondaryBtn}>
+        <AppButton variant="secondary" onClick={() => setStep(0)}>
           Back
-        </Button>
-        <Button variant="contained" onClick={goNext} sx={primaryBtn}>
-          Next
-        </Button>
+        </AppButton>
+        <AppButton onClick={goNext}>Next</AppButton>
       </>
     ) : (
       <>
-        <Button onClick={() => setStep(1)} disabled={saving} sx={secondaryBtn}>
+        <AppButton
+          variant="srcondary"
+          onClick={() => setStep(1)}
+          disabled={saving}
+        >
           Back
-        </Button>
-        <Button
-          variant="contained"
+        </AppButton>
+        <AppButton
           disabled={saving}
           onClick={() =>
             onCreate({
@@ -122,10 +100,9 @@ const NewTeamDialog = ({ open, currentUserId, saving, onCreate, onClose }) => {
               memberIds,
             })
           }
-          sx={primaryBtn}
         >
           {saving ? "Creating…" : "Create team"}
-        </Button>
+        </AppButton>
       </>
     );
 

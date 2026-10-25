@@ -1,4 +1,4 @@
-import { Box, Button, Typography, Stack, Link } from "@mui/material";
+import { Box, Typography, Stack, Link } from "@mui/material";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router";
 
 import TextField from "../../molecules/TextField/TextField";
@@ -7,6 +7,7 @@ import AuthTitle from "../../atoms/AuthTitle/AuthTitle";
 import AuthDescription from "../../atoms/AuthDescription/AuthDescription";
 import FormField from "../../molecules/FormField/FormField";
 import AlertBanner from "../../atoms/AlertBanner/AlertBanner";
+import AppButton from "../../atoms/AppButton/AppButton";
 import { useCurrentUser } from "../../../context/CurrentUserContext";
 
 import { useState } from "react";
@@ -149,21 +150,9 @@ const SignInForm = () => {
             flexWrap: "wrap",
           }}
         >
-          <Button
-            type="submit"
-            variant="contained"
-            sx={{
-              textTransform: "none",
-              fontSize: "14",
-              fontWeight: 500,
-              height: "38px",
-              p: "0px 12px",
-              borderRadius: "6px",
-              backgroundColor: "#365aff",
-            }}
-          >
+          <AppButton type="submit">
             {submitting ? "Signing in…" : "Sign in"}
-          </Button>
+          </AppButton>
 
           <Typography sx={{ fontSize: "14px", color: "#6b7280" }}>
             No account yet?{" "}

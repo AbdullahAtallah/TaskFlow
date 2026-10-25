@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Button, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { useSnackbar } from "notistack";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
@@ -10,6 +10,7 @@ import ProjectsPerTeamCard from "../../components/organisms/ProjectsPerTeamCard/
 import MyTeamsCard from "../../components/organisms/MyTeamsCard/MyTeamsCard";
 import NewProjectDialog from "../../components/organisms/NewProjectDialog/NewProjectDialog";
 import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
+import AppButton from "../../components/atoms/AppButton/AppButton";
 import useDashboard from "../../hooks/useDashboard";
 import useTeamMembers from "../../hooks/useTeamMembers";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -21,30 +22,6 @@ import { toTeamRow } from "../../api/teams/mappers";
 import { getProjects, createProject } from "../../api/projects";
 import { toProjectRow } from "../../api/projects/mappers";
 import { createTask } from "../../api/tasks";
-
-const secondaryBtn = {
-  textTransform: "none",
-  backgroundColor: "#ffffff",
-  color: "#111827",
-  border: "1px solid #e5e7eb",
-  fontWeight: 500,
-  fontSize: 14,
-  p: "0 12px",
-  height: "38px",
-  borderRadius: "6px",
-  boxShadow: 0,
-};
-
-const primaryBtn = {
-  textTransform: "none",
-  backgroundColor: "#365aff",
-  fontWeight: 500,
-  fontSize: 14,
-  p: "0 12px",
-  height: "38px",
-  borderRadius: "6px",
-  boxShadow: 0,
-};
 
 const BY_NAME = { take: 100, sort: { field: "name", dir: "asc" } };
 
@@ -221,18 +198,12 @@ const DashboardPage = () => {
         actions={
           <>
             {canCreateProject && (
-              <Button
-                variant="outlined"
-                sx={secondaryBtn}
-                onClick={openNewProject}
-              >
+              <AppButton variant="secondary" onClick={openNewProject}>
                 New project
-              </Button>
+              </AppButton>
             )}
             {canCreateTask && (
-              <Button variant="contained" sx={primaryBtn} onClick={openNewTask}>
-                New task
-              </Button>
+              <AppButton onClick={openNewTask}>New task</AppButton>
             )}
           </>
         }

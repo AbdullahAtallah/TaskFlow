@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import AppDialog from "../AppDialog/AppDialog";
 import SelectableUserRow from "../../molecules/SelectableUserRow/SelectableUserRow";
+import AppButton from "../../atoms/AppButton/AppButton";
 import { getUsers } from "../../../api/user";
 
 const AddMembersDialog = ({
@@ -39,40 +40,15 @@ const AddMembersDialog = ({
       onClose={saving ? undefined : onClose}
       actions={
         <>
-          <Button
-            onClick={onClose}
-            disabled={saving}
-            sx={{
-              textTransform: "none",
-              height: "38px",
-              px: "14px",
-              borderRadius: "6px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              color: "#111827",
-              fontWeight: 500,
-              fontSize: 14,
-            }}
-          >
+          <AppButton variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
-          </Button>
-          <Button
-            variant="contained"
+          </AppButton>
+          <AppButton
             onClick={() => onAdd(selected)}
             disabled={selected.length === 0 || saving}
-            sx={{
-              textTransform: "none",
-              height: "38px",
-              px: "14px",
-              borderRadius: "6px",
-              backgroundColor: "#365aff",
-              boxShadow: 0,
-              fontWeight: 500,
-              fontSize: 14,
-            }}
           >
             {saving ? "Adding…" : "Add members"}
-          </Button>
+          </AppButton>
         </>
       }
     >

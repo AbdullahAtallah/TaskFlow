@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
+import AppButton from "../../components/atoms/AppButton/AppButton";
 import ProjectsTable from "../../components/organisms/ProjectsTable/ProjectsTable";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import NewProjectDialog from "../../components/organisms/NewProjectDialog/NewProjectDialog";
@@ -101,22 +102,7 @@ const ProjectsPage = () => {
         subtitle="Projects of every team"
         actions={
           canCreate && (
-            <Button
-              onClick={() => setNewOpen(true)}
-              variant="contained"
-              sx={{
-                textTransform: "none",
-                backgroundColor: "#365aff",
-                fontWeight: 500,
-                fontSize: 14,
-                p: "0 12px",
-                height: "38px",
-                borderRadius: "6px",
-                boxShadow: 0,
-              }}
-            >
-              New project
-            </Button>
+            <AppButton onClick={() => setNewOpen(true)}>New project</AppButton>
           )
         }
       />
@@ -148,41 +134,20 @@ const ProjectsPage = () => {
         onClose={deleting ? undefined : () => setToDelete(null)}
         actions={
           <>
-            <Button
+            <AppButton
+              variant="secondary"
               onClick={() => setToDelete(null)}
               disabled={deleting}
-              sx={{
-                textTransform: "none",
-                height: "38px",
-                px: "14px",
-                borderRadius: "6px",
-                border: "1px solid #e5e7eb",
-                backgroundColor: "#ffffff",
-                color: "#111827",
-                fontWeight: 500,
-                fontSize: 14,
-              }}
             >
               Cancel
-            </Button>
-            <Button
-              variant="contained"
+            </AppButton>
+            <AppButton
+              variant="danger"
               onClick={confirmDelete}
               disabled={deleting}
-              sx={{
-                textTransform: "none",
-                height: "38px",
-                px: "14px",
-                borderRadius: "6px",
-                backgroundColor: "#dc2626",
-                boxShadow: 0,
-                fontWeight: 500,
-                fontSize: 14,
-                "&:hover": { backgroundColor: "#b91c1c", boxShadow: 0 },
-              }}
             >
               {deleting ? "Deleting…" : "Delete project"}
-            </Button>
+            </AppButton>
           </>
         }
       >

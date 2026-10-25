@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { SnackbarContent, useSnackbar } from "notistack";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import AppButton from "../../atoms/AppButton/AppButton";
+import { Box, IconButton, Typography } from "@mui/material";
 import { X } from "lucide-react";
 
 const toneColors = {
@@ -79,24 +80,9 @@ const Toast = forwardRef(
             <Box
               sx={{ display: "flex", justifyContent: "flex-end", mt: "20px" }}
             >
-              <Button
-                variant="outlined"
-                sx={{
-                  textTransform: "none",
-                  backgroundColor: "#ffffff",
-                  color: "#111827",
-                  border: "1px solid #e5e7eb",
-                  fontWeight: 500,
-                  fontSize: 14,
-                  p: "0 12px",
-                  height: "38px",
-                  borderRadius: "6px",
-                  boxShadow: 0,
-                }}
-                onClick={handleAction}
-              >
+              <AppButton variant="secondary" onClick={handleAction}>
                 {actionLabel}
-              </Button>
+              </AppButton>
             </Box>
           )}
         </Box>
