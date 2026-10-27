@@ -12,7 +12,16 @@ const PageToolbar = ({ children, count }) => {
         mb: "24px",
       }}
     >
-      {children}
+      <Box
+        sx={{
+          minWidth: 0,
+          maxWidth: "100%",
+          flex: { xs: "1 1 100%", sm: "0 1 auto" },
+        }}
+      >
+        {children}
+      </Box>
+
       <Typography
         sx={{ fontSize: "14px", lineHeight: "20px", color: "#6b7280" }}
       >

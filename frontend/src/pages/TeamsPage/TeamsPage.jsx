@@ -121,7 +121,7 @@ const TeamsPage = () => {
             type="search"
             placeholder="Search teams"
             fullWidth={false}
-            sx={{ width: "320px" }}
+            sx={{ width: { xs: "100%", sm: "320px" } }}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />

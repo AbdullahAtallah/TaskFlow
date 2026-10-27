@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Typography } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
@@ -108,11 +108,13 @@ const ProjectsPage = () => {
       />
       <PageBody>
         <PageToolbar count={countLabel}>
-          <SegmentedTabs
-            options={tabs}
-            value={selectedTeam}
-            onChange={setSelectedTeam}
-          />
+          <Box sx={{ overflowX: "auto", p: "2px", m: "-2px" }}>
+            <SegmentedTabs
+              options={tabs}
+              value={selectedTeam}
+              onChange={setSelectedTeam}
+            />
+          </Box>
         </PageToolbar>
         {error ? (
           <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
