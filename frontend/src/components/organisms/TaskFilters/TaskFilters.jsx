@@ -7,14 +7,16 @@ export const PRIORITY_OPTIONS = ["All", "High", "Medium", "Low"];
 export const ASSIGNEE_OPTIONS = ["Everyone", "Me", "Unassigned"];
 
 const Filter = ({ label, options, value, onChange }) => (
-  <Box>
+  <Box sx={{ minWidth: 0 }}>
     <FieldLabel>{label}</FieldLabel>
-    <SegmentedTabs
-      options={options}
-      value={value}
-      onChange={onChange}
-      ariaLabel={label}
-    />
+    <Box sx={{ overflowX: "auto", p: "2px", m: "-2px" }}>
+      <SegmentedTabs
+        options={options}
+        value={value}
+        onChange={onChange}
+        ariaLabel={label}
+      />
+    </Box>
   </Box>
 );
 
@@ -30,6 +32,11 @@ const Count = ({ children }) => (
     {children}
   </Typography>
 );
+
+const filterBox = {
+  flex: { xs: "1 1 100%", sm: "1 1 0" },
+  minWidth: { xs: 0, sm: "320px" },
+};
 
 const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
   const set = (key) => (value) => onChange({ ...filters, [key]: value });
@@ -57,8 +64,8 @@ const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
         direction="row"
         sx={{ alignItems: "flex-end", flexWrap: "wrap", gap: "24px" }}
       >
-        <Box sx={{ flex: 1, minWidth: "320px" }}>{priority}</Box>
-        <Box sx={{ flex: 1, minWidth: "320px" }}>{assignee}</Box>
+        <Box sx={filterBox}>{priority}</Box>
+        <Box sx={filterBox}>{assignee}</Box>
         <Count>{countLabel}</Count>
       </Stack>
     );
@@ -66,7 +73,7 @@ const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
   return (
     <Stack spacing="18px">
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: "24px" }}>
-        <Box sx={{ flex: 1, minWidth: "320px" }}>
+        <Box sx={filterBox}>
           <Filter
             label="Status"
             options={STATUS_OPTIONS}
@@ -74,7 +81,7 @@ const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
             onChange={set("status")}
           />
         </Box>
-        <Box sx={{ flex: 1, minWidth: "320px" }}>{priority}</Box>
+        <Box sx={filterBox}>{priority}</Box>
       </Stack>
 
       <Stack
@@ -82,6 +89,7 @@ const TaskFilters = ({ filters, onChange, countLabel, showStatus = true }) => {
         sx={{
           alignItems: "flex-end",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: "24px",
         }}
       >
