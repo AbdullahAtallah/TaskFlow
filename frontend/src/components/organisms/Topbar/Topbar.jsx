@@ -57,6 +57,15 @@ const Topbar = ({ onMenuClick }) => {
           overflow: "hidden",
           whiteSpace: "nowrap",
           textOverflow: "ellipsis",
+          "& .MuiBreadcrumbs-ol": { flexWrap: "nowrap" },
+          "& .MuiBreadcrumbs-li": { whiteSpace: "nowrap", flexShrink: 0 },
+          "& .MuiBreadcrumbs-separator": { flexShrink: 0 },
+          "& .MuiBreadcrumbs-li:last-of-type": {
+            flexShrink: 1,
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          },
         }}
       >
         <AppBreadcrumbs items={crumbsByPath[pathname] ?? []} />

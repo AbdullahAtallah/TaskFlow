@@ -7,19 +7,24 @@ const PageHeader = ({ title, subtitle, actions }) => {
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
+        flexDirection: { xs: "column", md: "row" },
+        alignItems: { xs: "flex-start", md: "center" },
         justifyContent: "space-between",
         gap: "16px",
-        p: "24px 32px",
+        p: { xs: "20px 16px", md: "24px 32px" },
         backgroundColor: "#f8f8fa",
         borderBottom: "1px solid #e5e7eb",
       }}
     >
-      <Box>
+      <Box sx={{ minWidth: 0 }}>
         <PageTitle>{title}</PageTitle>
         {subtitle && <PageSubtitle>{subtitle}</PageSubtitle>}
       </Box>
-      {actions && <Box sx={{ display: "flex", gap: "12px" }}>{actions}</Box>}
+      {actions && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+          {actions}
+        </Box>
+      )}
     </Box>
   );
 };
