@@ -1,4 +1,5 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
+import { Menu } from "lucide-react";
 import { useLocation, Link } from "react-router";
 import AppBreadcrumbs from "../../molecules/AppBreadcrumbs/AppBreadcrumbs";
 import UserInfo from "../../molecules/UserInfo/UserInfo";
@@ -13,9 +14,10 @@ const crumbsByPath = {
   "/management/roles": ["Management", "Roles"],
 };
 
-const Topbar = () => {
+const Topbar = ({ onMenuClick }) => {
   const { pathname } = useLocation();
   const { user } = useCurrentUser();
+  const isSmall = Boolean(onMenuClick);
 
   const roleNames = user?.roles?.map((role) => role.name).join(", ") ?? "";
 
@@ -26,20 +28,45 @@ const Topbar = () => {
         height: "100%",
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        px: "32px",
+        gap: "12px",
+        px: isSmall ? "16px" : "32px",
         borderBottom: "1px solid #e5e7eb",
         backgroundColor: "#ffffff",
         boxSizing: "border-box",
       }}
     >
-      <AppBreadcrumbs items={crumbsByPath[pathname] ?? []} />
-      <Link to="/profile" style={{ textDecoration: "none" }}>
-        {" "}
+      {isSmall && (
+        <IconButton
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          disableRipple
+          sx={{
+            ml: "-8px",
+            p: "8px",
+            color: "#434343",
+            borderRadius: "6px",
+          }}
+        >
+          <Menu size={22} strokeWidth={1.8} />
+        </IconButton>
+      )}
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+        }}
+      >
+        <AppBreadcrumbs items={crumbsByPath[pathname] ?? []} />
+      </Box>
+      <Link to="/profile" style={{ textDecoration: "none", flexShrink: 0 }}>
         <UserInfo
           name={user?.displayName ?? ""}
           email={user?.userName ?? ""}
           role={roleNames}
+          compact={isSmall}
         />
       </Link>
     </Box>
