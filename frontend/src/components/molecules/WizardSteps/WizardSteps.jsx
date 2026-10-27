@@ -40,10 +40,10 @@ const WizardSteps = ({ steps, current }) => (
             <Box
               sx={{
                 flex: 1,
-                minWidth: "24px",
+                minWidth: { xs: "12px", sm: "24px" },
                 height: "1px",
                 backgroundColor: "#e5e7eb",
-                mx: "10px",
+                mx: { xs: "6px", sm: "10px" },
               }}
             />
           )}
@@ -52,6 +52,10 @@ const WizardSteps = ({ steps, current }) => (
             <Box sx={circleSx(state)}>{index + 1}</Box>
             <Typography
               sx={{
+                display: {
+                  xs: state === "current" ? "block" : "none",
+                  sm: "block",
+                },
                 ml: "10px",
                 fontSize: "13px",
                 lineHeight: "22px",
