@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
 
+import { createPermissions } from "../auth/permissions";
 import { getCurrentUser } from "../api/user";
 import { logout } from "../api/auth";
 import { getToken, clearToken } from "../auth/tokenStorage";
@@ -83,24 +84,18 @@ export const CurrentUserProvider = ({ children }) => {
     navigate("/sign-in", { replace: true });
   }, [navigate]);
 
-  const value = useMemo(() => {
-    const packages = user?.packages ?? [];
-    const features = user?.features ?? [];
-    const claims = user?.claims ?? [];
-
-    return {
+  const value = useMemo(
+    () => ({
       user,
       loading,
       loadError,
       reloadUser,
       retryUser,
       signOut,
-      hasPackage: (pkg) => packages.includes(pkg),
-      hasFeature: (feature) => features.includes(feature),
-      hasClaim: (claim) => claims.includes(claim),
-      hasAnyClaim: (...list) => list.some((claim) => claims.includes(claim)),
-    };
-  }, [user, loading, loadError, reloadUser, retryUser, signOut]);
+      ...createPermissions(user),
+    }),
+    [user, loading, loadError, reloadUser, retryUser, signOut],
+  );
 
   return (
     <CurrentUserContext.Provider value={value}>
