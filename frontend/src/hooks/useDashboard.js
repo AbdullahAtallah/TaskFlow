@@ -19,6 +19,8 @@ const EMPTY = {
 const useDashboard = ({ canSeeTeams, canSeeProjects, canSeeTasks }) => {
   const [data, setData] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -58,6 +60,11 @@ const useDashboard = ({ canSeeTeams, canSeeProjects, canSeeTasks }) => {
           ? (teams.value.data ?? []).map(toTeamRow)
           : prev.myTeams,
     }));
+    const failed = [myTasks, counts, perTeam, teams].some(
+      (r) => r.status === "rejected",
+    );
+    setError(failed);
+    if (!failed) setLoaded(true);
     setLoading(false);
   }, [canSeeTeams, canSeeProjects, canSeeTasks]);
 
@@ -65,7 +72,7 @@ const useDashboard = ({ canSeeTeams, canSeeProjects, canSeeTasks }) => {
     load();
   }, [load]);
 
-  return { ...data, loading, reload: load };
+  return { ...data, loading, loaded, error, reload: load };
 };
 
 export default useDashboard;

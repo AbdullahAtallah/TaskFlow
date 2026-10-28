@@ -11,6 +11,8 @@ import MyTeamsCard from "../../components/organisms/MyTeamsCard/MyTeamsCard";
 import NewProjectDialog from "../../components/organisms/NewProjectDialog/NewProjectDialog";
 import TaskDialog from "../../components/organisms/TaskDialog/TaskDialog";
 import AppButton from "../../components/atoms/AppButton/AppButton";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
+import LoadingState from "../../components/molecules/LoadingState/LoadingState";
 import useDashboard from "../../hooks/useDashboard";
 import useTeamMembers from "../../hooks/useTeamMembers";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -78,6 +80,8 @@ const DashboardPage = () => {
     statusCounts,
     projectsPerTeam,
     myTeams,
+    loaded,
+    error,
     reload,
   } = useDashboard({ canSeeTeams, canSeeProjects, canSeeTasks });
 
@@ -85,9 +89,10 @@ const DashboardPage = () => {
   const { members } = useTeamMembers(taskProject?.teamId);
 
   const firstName = (user?.displayName || "").split(" ")[0];
-  const subtitle = canSeeTasks
-    ? `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${today}`
-    : today;
+  const subtitle =
+    canSeeTasks && loaded
+      ? `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${today}`
+      : today;
 
   const stats = {
     todo: statusCounts.toDo,
@@ -210,21 +215,33 @@ const DashboardPage = () => {
         }
       />
       <PageBody>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-            gap: "26px",
-            pb: "20px",
-          }}
-        >
-          {canSeeTasks && (
-            <MyTasksCard tasks={myTasks.map(toTaskItem)} total={myTasksTotal} />
-          )}
-          {canSeeTasks && <TaskStatsCard stats={stats} />}
-          {canSeeProjects && <ProjectsPerTeamCard teams={teamBars} />}
-          {canSeeTeams && <MyTeamsCard teams={myTeams} />}
-        </Box>
+        {error ? (
+          <ErrorState
+            message="The dashboard could not be loaded."
+            onRetry={reload}
+          />
+        ) : !loaded ? (
+          <LoadingState py="80px" />
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: "26px",
+              pb: "20px",
+            }}
+          >
+            {canSeeTasks && (
+              <MyTasksCard
+                tasks={myTasks.map(toTaskItem)}
+                total={myTasksTotal}
+              />
+            )}
+            {canSeeTasks && <TaskStatsCard stats={stats} />}
+            {canSeeProjects && <ProjectsPerTeamCard teams={teamBars} />}
+            {canSeeTeams && <MyTeamsCard teams={myTeams} />}
+          </Box>
+        )}
       </PageBody>
 
       <NewProjectDialog
