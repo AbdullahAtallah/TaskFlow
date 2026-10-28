@@ -1,3 +1,4 @@
+/* oxlint-disable react/only-export-components -- context files export their hook next to the provider */
 import { createContext, useContext, useEffect, useState } from "react";
 
 const BreadcrumbContext = createContext({ crumbs: null, setCrumbs: () => {} });
@@ -20,5 +21,6 @@ export const useBreadcrumbs = (crumbs) => {
   useEffect(() => {
     setCrumbs(crumbs);
     return () => setCrumbs(null);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- key is the stable form of crumbs
   }, [key, setCrumbs]);
 };

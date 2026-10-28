@@ -1,3 +1,4 @@
+/* oxlint-disable react/only-export-components -- context files export their hook next to the provider */
 import {
   createContext,
   useCallback,

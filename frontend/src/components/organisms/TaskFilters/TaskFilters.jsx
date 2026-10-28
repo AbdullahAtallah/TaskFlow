@@ -1,10 +1,11 @@
 import { Box, Stack, Typography } from "@mui/material";
 import FieldLabel from "../../atoms/FieldLabel/FieldLabel";
 import SegmentedTabs from "../../molecules/SegmentedTabs/SegmentedTabs";
-
-export const STATUS_OPTIONS = ["All", "To do", "In progress", "Done"];
-export const PRIORITY_OPTIONS = ["All", "High", "Medium", "Low"];
-export const ASSIGNEE_OPTIONS = ["Everyone", "Me", "Unassigned"];
+import {
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+  ASSIGNEE_OPTIONS,
+} from "../../../constants/taskFilters";
 
 const Filter = ({ label, options, value, onChange }) => (
   <Box sx={{ minWidth: 0 }}>

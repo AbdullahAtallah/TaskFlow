@@ -62,6 +62,7 @@ const DashboardPage = () => {
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
   const [taskProjectId, setTaskProjectId] = useState(null);
+  const [today] = useState(() => formatDate(new Date()));
 
   const { user, hasPackage, hasClaim } = useCurrentUser();
   const canSeeTeams = hasPackage(Package.Teams);
@@ -85,8 +86,8 @@ const DashboardPage = () => {
 
   const firstName = (user?.displayName || "").split(" ")[0];
   const subtitle = canSeeTasks
-    ? `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${formatDate(new Date())}`
-    : formatDate(new Date());
+    ? `${myTasksTotal} open ${myTasksTotal === 1 ? "task" : "tasks"} assigned to you · ${today}`
+    : today;
 
   const stats = {
     todo: statusCounts.toDo,

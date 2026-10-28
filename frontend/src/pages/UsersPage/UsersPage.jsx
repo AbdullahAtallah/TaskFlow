@@ -128,27 +128,26 @@ const UsersPage = () => {
       );
       return;
     } finally {
-      if (passwordUser.isMe) {
-        setPasswordUser(null);
-        enqueueSnackbar("Sign in again with your new password.", {
-          variant: "toast",
-          tone: "success",
-          title: "Password changed",
-        });
-        signOut();
-        return;
-      }
-
-      enqueueSnackbar(
-        `${passwordUser.name} can sign in with the new password.`,
-        {
-          variant: "toast",
-          tone: "success",
-          title: "Password set",
-        },
-      );
-      setPasswordUser(null);
+      setSavingPassword(false);
     }
+
+    if (passwordUser.isMe) {
+      setPasswordUser(null);
+      enqueueSnackbar("Sign in again with your new password.", {
+        variant: "toast",
+        tone: "success",
+        title: "Password changed",
+      });
+      signOut();
+      return;
+    }
+
+    enqueueSnackbar(`${passwordUser.name} can sign in with the new password.`, {
+      variant: "toast",
+      tone: "success",
+      title: "Password set",
+    });
+    setPasswordUser(null);
   };
 
   return (
