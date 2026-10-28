@@ -1,4 +1,3 @@
-import { Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";

@@ -1,4 +1,4 @@
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, GlobalStyles } from "@mui/material";
 import AppLogo from "../../atoms/AppLogo/AppLogo";
 import AuthFooter from "../../molecules/AuthFooter/AuthFooter";
 
@@ -34,6 +34,7 @@ const AuthLayout = ({ children }) => {
           gap: "24px",
         }}
       >
+        <GlobalStyles styles={{ body: { margin: 0, overflow: "hidden" } }} />
         {children}
       </Paper>
 

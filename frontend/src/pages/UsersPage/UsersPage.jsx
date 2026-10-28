@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useSnackbar } from "notistack";
-import { Typography } from "@mui/material";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import AppButton from "../../components/atoms/AppButton/AppButton";

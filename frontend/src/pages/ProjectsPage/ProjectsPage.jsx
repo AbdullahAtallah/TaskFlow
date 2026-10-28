@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Typography, Box } from "@mui/material";
+import HScroll from "../../components/atoms/HScroll/HScroll";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
@@ -109,13 +109,13 @@ const ProjectsPage = () => {
       />
       <PageBody>
         <PageToolbar count={countLabel}>
-          <Box sx={{ overflowX: "auto", p: "2px", m: "-2px" }}>
+          <HScroll>
             <SegmentedTabs
               options={tabs}
               value={selectedTeam}
               onChange={setSelectedTeam}
             />
-          </Box>
+          </HScroll>
         </PageToolbar>
         {error ? (
           <ErrorState

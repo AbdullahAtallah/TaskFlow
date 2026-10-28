@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Box, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
+import Column from "../../components/atoms/Column/Column";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageTabs from "../../components/molecules/PageTabs/PageTabs";
@@ -125,9 +125,9 @@ const TeamDetailsPage = () => {
           ]}
         />
 
-        <Box sx={{ mt: "24px" }}>
+        <Column sx={{ mt: "24px" }}>
           {tab === "general" && (
-            <Stack spacing="24px" sx={{ maxWidth: "645px" }}>
+            <Column sx={{ maxWidth: "645px" }}>
               <TeamGeneralCard
                 team={team}
                 canManage={canManage}
@@ -141,7 +141,7 @@ const TeamDetailsPage = () => {
                   onDelete={handleDelete}
                 />
               )}
-            </Stack>
+            </Column>
           )}
           {tab === "members" && (
             <TeamMembersTab
@@ -163,7 +163,7 @@ const TeamDetailsPage = () => {
                 loading={projectsLoading}
               />
             ))}
-        </Box>
+        </Column>
       </PageBody>
     </>
   );

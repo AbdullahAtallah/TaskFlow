@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { Box, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
+import Column from "../../components/atoms/Column/Column";
+import Row from "../../components/atoms/Row/Row";
+import CardGrid from "../../components/atoms/CardGrid/CardGrid";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageTabs from "../../components/molecules/PageTabs/PageTabs";
@@ -161,14 +163,10 @@ const RoleDetailsPage = () => {
             {
               value: "Assigned users",
               label: (
-                <Stack
-                  direction="row"
-                  spacing="8px"
-                  sx={{ alignItems: "center" }}
-                >
+                <Row gap="8px">
                   <span>Assigned users</span>
                   <NavCount>{users.length}</NavCount>
-                </Stack>
+                </Row>
               ),
             },
           ]}
@@ -176,23 +174,16 @@ const RoleDetailsPage = () => {
           onChange={setTab}
         />
 
-        <Box sx={{ mt: "32px", pb: "20px" }}>
+        <Column sx={{ mt: "32px", pb: "20px" }}>
           {tab === "Permissions" ? (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-                gap: "32px",
-                alignItems: "start",
-              }}
-            >
-              <Stack spacing="32px">{renderColumn(LEFT)}</Stack>
-              <Stack spacing="32px">{renderColumn(RIGHT)}</Stack>
-            </Box>
+            <CardGrid gap="32px">
+              <Column gap="32px">{renderColumn(LEFT)}</Column>
+              <Column gap="32px">{renderColumn(RIGHT)}</Column>
+            </CardGrid>
           ) : (
             <RoleUsersTable users={users} />
           )}
-        </Box>
+        </Column>
       </PageBody>
     </>
   );

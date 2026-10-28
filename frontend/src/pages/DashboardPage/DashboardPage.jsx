@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Box } from "@mui/material";
 import { useSnackbar } from "notistack";
+import CardGrid from "../../components/atoms/CardGrid/CardGrid";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import MyTasksCard from "../../components/organisms/MyTasksCard/MyTasksCard";
@@ -223,14 +223,7 @@ const DashboardPage = () => {
         ) : !loaded ? (
           <LoadingState py="80px" />
         ) : (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-              gap: "26px",
-              pb: "20px",
-            }}
-          >
+          <CardGrid gap="26px" alignItems="stretch" sx={{ pb: "20px" }}>
             {canSeeTasks && (
               <MyTasksCard
                 tasks={myTasks.map(toTaskItem)}
@@ -240,7 +233,7 @@ const DashboardPage = () => {
             {canSeeTasks && <TaskStatsCard stats={stats} />}
             {canSeeProjects && <ProjectsPerTeamCard teams={teamBars} />}
             {canSeeTeams && <MyTeamsCard teams={myTeams} />}
-          </Box>
+          </CardGrid>
         )}
       </PageBody>
 

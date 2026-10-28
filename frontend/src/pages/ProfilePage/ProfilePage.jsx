@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import CardGrid from "../../components/atoms/CardGrid/CardGrid";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PermissionsCard from "../../components/organisms/PermissionsCard/PermissionsCard";
@@ -48,20 +48,13 @@ const ProfilePage = () => {
         subtitle="Your account, teams and permissions"
       />
       <PageBody>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-            gap: "24px",
-            alignItems: "start",
-          }}
-        >
+        <CardGrid>
           <ProfileCard user={profile} />
           <PermissionsCard
             packages={sortByOrder(user.packages, Object.values(Package))}
             claims={sortByOrder(user.claims, Object.values(Claim))}
           />
-        </Box>
+        </CardGrid>
       </PageBody>
     </>
   );

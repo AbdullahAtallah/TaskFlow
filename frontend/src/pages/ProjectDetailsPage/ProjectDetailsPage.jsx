@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate, Navigate, useParams } from "react-router";
-import { Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 
+import Row from "../../components/atoms/Row/Row";
+import Column from "../../components/atoms/Column/Column";
+import EmptyState from "../../components/molecules/EmptyState/EmptyState";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
@@ -230,7 +232,7 @@ const ProjectDetailsPage = () => {
         title={project.name}
         subtitle={subtitle}
         actions={
-          <Stack direction="row" spacing="24px" sx={{ alignItems: "center" }}>
+          <Row gap="24px">
             {canSeeBoard && (
               <SegmentedTabs
                 options={VIEWS}
@@ -246,17 +248,15 @@ const ProjectDetailsPage = () => {
               />
             )}
             {canCreateTask && <AppButton onClick={openNew}>New task</AppButton>}
-          </Stack>
+          </Row>
         }
       />
 
       <PageBody>
         {!canSeeTasks ? (
-          <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
-            You don't have access to tasks.
-          </Typography>
+          <EmptyState title="You don't have access to tasks." />
         ) : (
-          <Stack spacing="32px">
+          <Column gap="32px">
             <TaskFilters
               filters={filters}
               onChange={setFilters}
@@ -287,7 +287,7 @@ const ProjectDetailsPage = () => {
                 onDelete={setToDelete}
               />
             )}
-          </Stack>
+          </Column>
         )}
       </PageBody>
 
