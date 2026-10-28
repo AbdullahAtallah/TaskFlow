@@ -21,7 +21,7 @@ const ProfileCard = ({ user }) => {
           <TagGroup
             label="Teams"
             items={user.teams}
-            emptyText="Not in any team yet"
+            emptyText={user.teamsEmptyText ?? "Not in any team yet"}
           />
         </Stack>
 

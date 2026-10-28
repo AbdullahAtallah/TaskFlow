@@ -15,12 +15,18 @@ const ProfilePage = () => {
   const canSeeTeams = hasPackage(Package.Teams);
 
   const [teams, setTeams] = useState([]);
+  const [teamsLoading, setTeamsLoading] = useState(canSeeTeams);
+  const [teamsError, setTeamsError] = useState(false);
 
   useEffect(() => {
     if (!canSeeTeams) return;
     getTeams({ onlyMine: true, take: 100, sort: { field: "name", dir: "asc" } })
-      .then((r) => setTeams(r.data.map((t) => t.name)))
-      .catch(() => setTeams([]));
+      .then((r) => {
+        setTeams(r.data.map((t) => t.name));
+        setTeamsError(false);
+      })
+      .catch(() => setTeamsError(true))
+      .finally(() => setTeamsLoading(false));
   }, [canSeeTeams]);
 
   const profile = {
@@ -28,6 +34,11 @@ const ProfilePage = () => {
     email: user.userName,
     roles: toNames(user.roles),
     teams,
+    teamsEmptyText: teamsLoading
+      ? "Loading…"
+      : teamsError
+        ? "Teams could not be loaded."
+        : "Not in any team yet",
   };
 
   return (
