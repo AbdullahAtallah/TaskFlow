@@ -1,17 +1,10 @@
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Table, TableBody, TableHead, TableRow } from "@mui/material";
 import HeadCell from "../../atoms/HeadCell/HeadCell";
 import BodyCell from "../../atoms/BodyCell/BodyCell";
 import TextLink from "../../atoms/TextLink/TextLink";
 import ClampText from "../../atoms/ClampText/ClampText";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 import { formatDate } from "../../../utils";
 
 const ProjectsTable = ({ projects, loading, canManage, onOpen, onDelete }) => {
@@ -46,24 +39,13 @@ const ProjectsTable = ({ projects, loading, canManage, onOpen, onDelete }) => {
         </TableHead>
 
         <TableBody>
-          {projects.length === 0 && !loading && (
-            <TableRow>
-              <TableCell
-                colSpan={7}
-                sx={{ py: "48px", textAlign: "center", borderBottom: 0 }}
-              >
-                <Typography
-                  sx={{ fontSize: "15px", fontWeight: 500, color: "#111827" }}
-                >
-                  No projects yet
-                </Typography>
-                <Typography
-                  sx={{ mt: "4px", fontSize: "14px", color: "#6b7280" }}
-                >
-                  There are no projects for this team.
-                </Typography>
-              </TableCell>
-            </TableRow>
+          {projects.length === 0 && (
+            <TableStateRow
+              colSpan={7}
+              loading={loading}
+              emptyTitle="No projects yet"
+              emptyText="There are no projects for this team."
+            />
           )}
 
           {projects.map((project) => (

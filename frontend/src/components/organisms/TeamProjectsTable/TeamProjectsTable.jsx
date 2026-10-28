@@ -1,14 +1,7 @@
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Table, TableBody, TableHead, TableRow } from "@mui/material";
 import HeadCell from "../../atoms/HeadCell/HeadCell";
 import BodyCell from "../../atoms/BodyCell/BodyCell";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 import { formatDate } from "../../../utils";
 import { useNavigate } from "react-router";
 
@@ -35,24 +28,13 @@ const TeamProjectsTable = ({ projects, loading }) => {
         </TableHead>
 
         <TableBody>
-          {projects.length === 0 && !loading && (
-            <TableRow>
-              <TableCell
-                colSpan={4}
-                sx={{ py: "48px", textAlign: "center", borderBottom: 0 }}
-              >
-                <Typography
-                  sx={{ fontSize: "15px", fontWeight: 500, color: "#111827" }}
-                >
-                  No projects yet
-                </Typography>
-                <Typography
-                  sx={{ mt: "4px", fontSize: "14px", color: "#6b7280" }}
-                >
-                  This team doesn't own any projects.
-                </Typography>
-              </TableCell>
-            </TableRow>
+          {projects.length === 0 && (
+            <TableStateRow
+              colSpan={4}
+              loading={loading}
+              emptyTitle="No projects yet"
+              emptyText="This team doesn't own any projects."
+            />
           )}
 
           {projects.map((project) => (

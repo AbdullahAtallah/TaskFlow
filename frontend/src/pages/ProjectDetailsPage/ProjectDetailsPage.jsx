@@ -8,6 +8,8 @@ import PageBody from "../../components/atoms/PageBody/PageBody";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
+import LoadingState from "../../components/molecules/LoadingState/LoadingState";
 import AppButton from "../../components/atoms/AppButton/AppButton";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import TaskFilters from "../../components/organisms/TaskFilters/TaskFilters";
@@ -44,7 +46,7 @@ const ProjectDetailsPage = () => {
 
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null); // null = new task
+  const [editingTask, setEditingTask] = useState(null);
   const [savingTask, setSavingTask] = useState(false);
   const [toDelete, setToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -63,15 +65,17 @@ const ProjectDetailsPage = () => {
   const onBoard = pathname.endsWith("/board");
   const view = onBoard ? "Board" : "List";
 
-  const { project, loading, error } = useProject(id);
+  const { project, loading, error, reload: reloadProject } = useProject(id);
   const {
     tasks: allTasks,
     loading: tasksLoading,
+    error: tasksError,
     reload: reloadTasks,
   } = useProjectTasks(id, canSeeTasks);
   const {
     columns,
     loading: boardLoading,
+    error: boardError,
     reload: reloadBoard,
   } = useTaskBoard(id, onBoard && canSeeBoard);
   const { members } = useTeamMembers(project?.teamId);
@@ -89,10 +93,12 @@ const ProjectDetailsPage = () => {
 
   const shownCount = onBoard ? boardCount : tasks.length;
   const isLoading = onBoard ? boardLoading : tasksLoading;
-  const countLabel = isLoading
-    ? "Loading…"
-    : `${shownCount} ${shownCount === 1 ? "task" : "tasks"}`;
-
+  const shownError = onBoard ? boardError : tasksError;
+  const countLabel = shownError
+    ? ""
+    : isLoading
+      ? "Loading…"
+      : `${shownCount} ${shownCount === 1 ? "task" : "tasks"}`;
   useBreadcrumbs(
     project
       ? [
@@ -125,11 +131,9 @@ const ProjectDetailsPage = () => {
   if (error || !project) {
     return (
       <PageBody>
-        <NotFoundState
-          title="Something went wrong"
-          message="This project could not be loaded. Please try again."
-          backTo="/projects"
-          backLabel="Back to projects"
+        <ErrorState
+          message="This project could not be loaded."
+          onRetry={reloadProject}
         />
       </PageBody>
     );
@@ -260,11 +264,20 @@ const ProjectDetailsPage = () => {
               showStatus={!onBoard}
             />
 
-            {onBoard ? (
-              <TaskBoard
-                columns={boardColumns}
-                onOpen={canManageTasks ? openEdit : undefined}
+            {shownError ? (
+              <ErrorState
+                message="The tasks could not be loaded."
+                onRetry={onBoard ? reloadBoard : reloadTasks}
               />
+            ) : onBoard ? (
+              boardLoading && columns.length === 0 ? (
+                <LoadingState />
+              ) : (
+                <TaskBoard
+                  columns={boardColumns}
+                  onOpen={canManageTasks ? openEdit : undefined}
+                />
+              )
             ) : (
               <TasksTable
                 tasks={tasks}

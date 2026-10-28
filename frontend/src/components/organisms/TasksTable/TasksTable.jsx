@@ -3,7 +3,6 @@ import {
   Stack,
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableRow,
   Typography,
@@ -15,6 +14,7 @@ import PriorityChip from "../../atoms/PriorityChip/PriorityChip";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import UserNameCell from "../../molecules/UserNameCell/UserNameCell";
 import RowActions from "../../molecules/RowActions/RowActions";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 import { formatDate } from "../../../utils";
 import { daysOverdue } from "../../../utils/taskDates";
 
@@ -54,24 +54,13 @@ const TasksTable = ({ tasks, loading, canManage, onEdit, onDelete }) => (
       </TableHead>
 
       <TableBody>
-        {tasks.length === 0 && !loading && (
-          <TableRow>
-            <TableCell
-              colSpan={6}
-              sx={{ py: "48px", textAlign: "center", borderBottom: 0 }}
-            >
-              <Typography
-                sx={{ fontSize: "15px", fontWeight: 500, color: "#111827" }}
-              >
-                No tasks found
-              </Typography>
-              <Typography
-                sx={{ mt: "4px", fontSize: "14px", color: "#6b7280" }}
-              >
-                Try another filter, or create a new task.
-              </Typography>
-            </TableCell>
-          </TableRow>
+        {tasks.length === 0 && (
+          <TableStateRow
+            colSpan={6}
+            loading={loading}
+            emptyTitle="No tasks found"
+            emptyText="Try another filter, or create a new task."
+          />
         )}
 
         {tasks.map((task) => {

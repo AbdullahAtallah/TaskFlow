@@ -4,6 +4,7 @@ import { useSnackbar } from "notistack";
 import TeamMembersTable from "../TeamMembersTable/TeamMembersTable";
 import AddMembersDialog from "../AddMembersDialog/AddMembersDialog";
 import AppButton from "../../atoms/AppButton/AppButton";
+import ErrorState from "../../molecules/ErrorState/ErrorState";
 
 import useTeamMembers from "../../../hooks/useTeamMembers";
 import { addTeamMembers, removeTeamMember } from "../../../api/teams";
@@ -69,9 +70,7 @@ const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
 
   if (error) {
     return (
-      <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
-        Could not load the members.
-      </Typography>
+      <ErrorState message="The members could not be loaded." onRetry={reload} />
     );
   }
 
@@ -98,6 +97,7 @@ const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
 
       <TeamMembersTable
         members={members}
+        loading={loading}
         canManage={canManage}
         removingId={removingId}
         onRemove={handleRemove}

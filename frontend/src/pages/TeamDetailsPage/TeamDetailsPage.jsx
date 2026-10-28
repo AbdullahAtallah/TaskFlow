@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useSnackbar } from "notistack";
 import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
@@ -11,6 +11,7 @@ import TeamDangerCard from "../../components/organisms/TeamDangerCard/TeamDanger
 import TeamMembersTab from "../../components/organisms/TeamMembersTab/TeamMembersTab";
 import TeamProjectsTable from "../../components/organisms/TeamProjectsTable/TeamProjectsTable";
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
 import useTeam from "../../hooks/useTeam";
 import useTeamProjects from "../../hooks/useTeamProjects";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -28,7 +29,12 @@ const TeamDetailsPage = () => {
   const canManageMembers = hasClaim(Claim.TeamsMembersManage);
 
   const { team, loading, error, reload } = useTeam(id);
-  const { projects, loading: projectsLoading } = useTeamProjects(id);
+  const {
+    projects,
+    loading: projectsLoading,
+    error: projectsError,
+    reload: reloadProjects,
+  } = useTeamProjects(id);
   const [tab, setTab] = useState("general");
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -55,9 +61,7 @@ const TeamDetailsPage = () => {
   if (error || !team) {
     return (
       <PageBody>
-        <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
-          This team could not be loaded.
-        </Typography>
+        <ErrorState message="This team could not be loaded." onRetry={reload} />
       </PageBody>
     );
   }
@@ -147,9 +151,18 @@ const TeamDetailsPage = () => {
               onChanged={reload}
             />
           )}
-          {tab === "projects" && (
-            <TeamProjectsTable projects={projects} loading={projectsLoading} />
-          )}
+          {tab === "projects" &&
+            (projectsError ? (
+              <ErrorState
+                message="The projects could not be loaded."
+                onRetry={reloadProjects}
+              />
+            ) : (
+              <TeamProjectsTable
+                projects={projects}
+                loading={projectsLoading}
+              />
+            ))}
         </Box>
       </PageBody>
     </>

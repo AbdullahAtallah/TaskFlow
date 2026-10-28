@@ -8,6 +8,7 @@ import PageTabs from "../../components/molecules/PageTabs/PageTabs";
 import NavCount from "../../components/atoms/NavCount/NavCount";
 import FullPageLoader from "../../components/atoms/FullPageLoader/FullPageLoader";
 import NotFoundState from "../../components/molecules/NotFoundState/NotFoundState";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
 import PackageCard from "../../components/organisms/PackageCard/PackageCard";
 import RoleUsersTable from "../../components/organisms/RoleUsersTable/RoleUsersTable";
 import useRole from "../../hooks/useRole";
@@ -28,7 +29,7 @@ const RoleDetailsPage = () => {
   const [packages, setPackages] = useState([]);
   const [claims, setClaims] = useState([]);
 
-  const { role, users, loading, error } = useRole(id);
+  const { role, users, loading, error, reload } = useRole(id);
 
   useEffect(() => {
     if (!role) return;
@@ -64,12 +65,7 @@ const RoleDetailsPage = () => {
   if (error || !role) {
     return (
       <PageBody>
-        <NotFoundState
-          title="Something went wrong"
-          message="This role could not be loaded. Please try again."
-          backTo="/management/roles"
-          backLabel="Back to roles"
-        />
+        <ErrorState message="This role could not be loaded." onRetry={reload} />
       </PageBody>
     );
   }

@@ -7,6 +7,7 @@ import AppButton from "../../components/atoms/AppButton/AppButton";
 import UsersTable from "../../components/organisms/UsersTable/UsersTable";
 import NewUserDialog from "../../components/organisms/NewUserDialog/NewUserDialog";
 import SetPasswordDialog from "../../components/organisms/SetPasswordDialog/SetPasswordDialog";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
 import useUsers from "../../hooks/useUsers";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { updateUser, createUser, setUserPassword } from "../../api/user";
@@ -159,12 +160,14 @@ const UsersPage = () => {
       />
       <PageBody>
         {error ? (
-          <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
-            Could not load users. Please try again.
-          </Typography>
+          <ErrorState
+            message="The users could not be loaded."
+            onRetry={reload}
+          />
         ) : (
           <UsersTable
             users={rows}
+            loading={loading}
             onToggleActive={toggleActive}
             onSetPassword={setPasswordUser}
           />

@@ -4,6 +4,7 @@ import PageHeader from "../../components/molecules/PageHeader/PageHeader";
 import PageBody from "../../components/atoms/PageBody/PageBody";
 import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import SegmentedTabs from "../../components/molecules/SegmentedTabs/SegmentedTabs";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
 import AppButton from "../../components/atoms/AppButton/AppButton";
 import ProjectsTable from "../../components/organisms/ProjectsTable/ProjectsTable";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
@@ -117,9 +118,10 @@ const ProjectsPage = () => {
           </Box>
         </PageToolbar>
         {error ? (
-          <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
-            Could not load projects. Please try again.
-          </Typography>
+          <ErrorState
+            message="The projects could not be loaded."
+            onRetry={reload}
+          />
         ) : (
           <ProjectsTable
             projects={projects}

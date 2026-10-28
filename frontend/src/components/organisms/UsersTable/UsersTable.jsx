@@ -5,8 +5,9 @@ import TextLink from "../../atoms/TextLink/TextLink";
 import Tag from "../../atoms/Tag/Tag";
 import SortLabel from "../../molecules/SortLabel/SortLabel";
 import UserNameCell from "../../molecules/UserNameCell/UserNameCell";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 
-const UsersTable = ({ users, onToggleActive, onSetPassword }) => {
+const UsersTable = ({ users, loading, onToggleActive, onSetPassword }) => {
   return (
     <Box
       sx={{
@@ -31,6 +32,14 @@ const UsersTable = ({ users, onToggleActive, onSetPassword }) => {
         </TableHead>
 
         <TableBody>
+          {users.length === 0 && (
+            <TableStateRow
+              colSpan={6}
+              loading={loading}
+              emptyTitle="No users yet"
+              emptyText="Create the first user to get started."
+            />
+          )}
           {users.map((user) => (
             <TableRow
               key={user.id}

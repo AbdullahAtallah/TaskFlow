@@ -11,9 +11,15 @@ import BodyCell from "../../atoms/BodyCell/BodyCell";
 import Tag from "../../atoms/Tag/Tag";
 import TextLink from "../../atoms/TextLink/TextLink";
 import UserNameCell from "../../molecules/UserNameCell/UserNameCell";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 
-const TeamMembersTable = ({ members, canManage, removingId, onRemove }) => (
-    
+const TeamMembersTable = ({
+  members,
+  loading,
+  canManage,
+  removingId,
+  onRemove,
+}) => (
   <Box
     sx={{
       border: "1px solid #e5e7eb",
@@ -33,6 +39,14 @@ const TeamMembersTable = ({ members, canManage, removingId, onRemove }) => (
       </TableHead>
 
       <TableBody>
+        {members.length === 0 && (
+          <TableStateRow
+            colSpan={4}
+            loading={loading}
+            emptyTitle="No members yet"
+            emptyText="Add people to this team to get started."
+          />
+        )}
         {members.map((member) => (
           <TableRow
             key={member.userId}

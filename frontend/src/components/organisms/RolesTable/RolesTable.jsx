@@ -1,6 +1,7 @@
 import { Box, Table, TableBody, TableHead, TableRow } from "@mui/material";
 import HeadCell from "../../atoms/HeadCell/HeadCell";
 import BodyCell from "../../atoms/BodyCell/BodyCell";
+import TableStateRow from "../../molecules/TableStateRow/TableStateRow";
 import Tag from "../../atoms/Tag/Tag";
 
 const RolesTable = ({ roles, loading, onOpen }) => {
@@ -26,34 +27,35 @@ const RolesTable = ({ roles, loading, onOpen }) => {
         </TableHead>
 
         <TableBody>
-          {loading && roles.length === 0 ? (
-            <TableRow>
-              <BodyCell colSpan={6}>Loading…</BodyCell>
+          {roles.length === 0 && (
+            <TableStateRow
+              colSpan={6}
+              loading={loading}
+              emptyTitle="No roles"
+            />
+          )}{" "}
+          {roles.map((role) => (
+            <TableRow
+              key={role.id}
+              onClick={onOpen ? () => onOpen(role) : undefined}
+              sx={{
+                "&:last-child td": { borderBottom: 0 },
+                ...(onOpen && {
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#fafbfc" },
+                }),
+              }}
+            >
+              <BodyCell bold>{role.name}</BodyCell>
+              <BodyCell>{role.description}</BodyCell>
+              <BodyCell>{role.packages}</BodyCell>
+              <BodyCell>{role.claims}</BodyCell>
+              <BodyCell>{role.users}</BodyCell>
+              <BodyCell>
+                {role.isDefault && <Tag tone="info">Default</Tag>}
+              </BodyCell>
             </TableRow>
-          ) : (
-            roles.map((role) => (
-              <TableRow
-                key={role.id}
-                onClick={onOpen ? () => onOpen(role) : undefined}
-                sx={{
-                  "&:last-child td": { borderBottom: 0 },
-                  ...(onOpen && {
-                    cursor: "pointer",
-                    "&:hover": { backgroundColor: "#fafbfc" },
-                  }),
-                }}
-              >
-                <BodyCell bold>{role.name}</BodyCell>
-                <BodyCell>{role.description}</BodyCell>
-                <BodyCell>{role.packages}</BodyCell>
-                <BodyCell>{role.claims}</BodyCell>
-                <BodyCell>{role.users}</BodyCell>
-                <BodyCell>
-                  {role.isDefault && <Tag tone="info">Default</Tag>}
-                </BodyCell>
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </Box>

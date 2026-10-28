@@ -7,6 +7,7 @@ import PageToolbar from "../../components/molecules/PageToolbar/PageToolbar";
 import AppDialog from "../../components/organisms/AppDialog/AppDialog";
 import NewTeamDialog from "../../components/organisms/NewTeamDialog/NewTeamDialog";
 import AppButton from "../../components/atoms/AppButton/AppButton";
+import ErrorState from "../../components/molecules/ErrorState/ErrorState";
 import useTeams from "../../hooks/useTeams";
 import useDebouncedValue from "../../hooks/useDebouncedValue";
 import { useCurrentUser } from "../../context/CurrentUserContext";
@@ -128,9 +129,10 @@ const TeamsPage = () => {
         </PageToolbar>
 
         {error ? (
-          <Typography sx={{ fontSize: 14, color: "#dc2626" }}>
-            Could not load teams. Please try again.
-          </Typography>
+          <ErrorState
+            message="The teams could not be loaded."
+            onRetry={reload}
+          />
         ) : (
           <TeamsTable
             teams={teams}
