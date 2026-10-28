@@ -22,6 +22,7 @@ export const CurrentUserProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(() => Boolean(getToken()));
+  const [loadError, setLoadError] = useState(false);
 
   const reloadUser = useCallback(async () => {
     if (!getToken()) {
@@ -33,15 +34,26 @@ export const CurrentUserProvider = ({ children }) => {
     try {
       const current = await getCurrentUser();
       setUser(current);
+      setLoadError(false);
       return current;
-    } catch {
-      clearToken();
-      setUser(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        clearToken();
+        setUser(null);
+      } else {
+        setLoadError(true);
+      }
       return null;
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const retryUser = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
+    await reloadUser();
+  }, [reloadUser]);
 
   useEffect(() => {
     reloadUser();
@@ -79,14 +91,16 @@ export const CurrentUserProvider = ({ children }) => {
     return {
       user,
       loading,
+      loadError,
       reloadUser,
+      retryUser,
       signOut,
       hasPackage: (pkg) => packages.includes(pkg),
       hasFeature: (feature) => features.includes(feature),
       hasClaim: (claim) => claims.includes(claim),
       hasAnyClaim: (...list) => list.some((claim) => claims.includes(claim)),
     };
-  }, [user, loading, reloadUser, signOut]);
+  }, [user, loading, loadError, reloadUser, retryUser, signOut]);
 
   return (
     <CurrentUserContext.Provider value={value}>
