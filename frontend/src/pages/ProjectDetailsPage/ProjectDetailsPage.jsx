@@ -183,13 +183,17 @@ const ProjectDetailsPage = () => {
       } else {
         await createTask({ projectId: id, ...values });
       }
-    } catch {
+    } catch (err) {
+      setSavingTask(false);
+      if (err.response?.status === 403) {
+        setTaskDialogOpen(false);
+        return;
+      }
       showError(
         isEdit
           ? "The task could not be saved."
           : "The task could not be created.",
       );
-      setSavingTask(false);
       return;
     }
 
@@ -210,9 +214,13 @@ const ProjectDetailsPage = () => {
 
     try {
       await deleteTask(task.id);
-    } catch {
-      showError(`${task.title} could not be deleted.`);
+    } catch (err) {
       setDeleting(false);
+      if (err.response?.status === 403) {
+        setToDelete(null);
+        return;
+      }
+      showError(`${task.title} could not be deleted.`);
       return;
     }
 
