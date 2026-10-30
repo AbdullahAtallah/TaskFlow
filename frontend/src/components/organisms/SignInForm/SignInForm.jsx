@@ -91,7 +91,7 @@ const SignInForm = () => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} noValidate>
       <AuthTitle>Sign in</AuthTitle>
       <AuthDescription>Sign in with your work e-mail address.</AuthDescription>
 

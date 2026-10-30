@@ -94,7 +94,7 @@ const CreateAccountForm = () => {
     }
   };
   return (
-    <Box component="form" onSubmit={handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit} noValidate>
       <AuthTitle>Create account</AuthTitle>
       <AuthDescription>
         New accounts get the User role. An administrator adds you to a team.
