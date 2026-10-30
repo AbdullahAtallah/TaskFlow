@@ -17,11 +17,13 @@ client.interceptors.response.use(
     const status = error.response?.status;
     const isSignInCall = error.config?.url?.startsWith("/auth/");
     if (status === 401 && !isSignInCall) {
+      error.handled = true;
       clearToken();
       window.location.assign("/sign-in");
     }
 
     if (status === 403) {
+      error.handled = true;
       window.dispatchEvent(new Event("api:forbidden"));
     }
 

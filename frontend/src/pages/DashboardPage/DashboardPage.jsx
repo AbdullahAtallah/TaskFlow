@@ -19,6 +19,7 @@ import { useCurrentUser } from "../../context/CurrentUserContext";
 import { Claim, Package } from "../../constants/permissions";
 import { formatDate } from "../../utils";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 import { getTeams } from "../../api/teams";
 import { toTeamRow } from "../../api/teams/mappers";
 import { getProjects, createProject } from "../../api/projects";
@@ -155,7 +156,11 @@ const DashboardPage = () => {
     setSaving(true);
     try {
       await createProject(data);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        closeDialog();
+        return;
+      }
       showError("The project could not be created.");
       return;
     } finally {
@@ -181,7 +186,11 @@ const DashboardPage = () => {
     setSaving(true);
     try {
       await createTask({ projectId, ...task });
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        closeDialog();
+        return;
+      }
       showError("The task could not be created.");
       return;
     } finally {

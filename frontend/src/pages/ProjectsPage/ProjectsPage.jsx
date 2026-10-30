@@ -17,6 +17,7 @@ import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router";
 import { createProject, deleteProject } from "../../api/projects";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 
 const ALL_TEAMS = "All teams";
 
@@ -56,7 +57,11 @@ const ProjectsPage = () => {
         title: "Project deleted",
       });
       setToDelete(null);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setToDelete(null);
+        return;
+      }
       enqueueSnackbar(`${toDelete.name} could not be deleted.`, {
         variant: "toast",
         tone: "error",
@@ -85,7 +90,11 @@ const ProjectsPage = () => {
         }),
       });
       setNewOpen(false);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setNewOpen(false);
+        return;
+      }
       enqueueSnackbar("The project could not be created.", {
         variant: "toast",
         tone: "error",

@@ -28,6 +28,7 @@ import { toTaskRow } from "../../api/tasks/mappers";
 
 import filterTasks from "../../utils/filterTasks";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { useBreadcrumbs } from "../../context/BreadcrumbContext";
 import { Claim, Feature, Package } from "../../constants/permissions";
@@ -185,7 +186,7 @@ const ProjectDetailsPage = () => {
       }
     } catch (err) {
       setSavingTask(false);
-      if (err.response?.status === 403) {
+      if (isHandled(err)) {
         setTaskDialogOpen(false);
         return;
       }
@@ -216,7 +217,7 @@ const ProjectDetailsPage = () => {
       await deleteTask(task.id);
     } catch (err) {
       setDeleting(false);
-      if (err.response?.status === 403) {
+      if (isHandled(err)) {
         setToDelete(null);
         return;
       }

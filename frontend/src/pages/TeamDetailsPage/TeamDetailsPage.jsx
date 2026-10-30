@@ -19,6 +19,7 @@ import { useBreadcrumbs } from "../../context/BreadcrumbContext";
 import { Claim } from "../../constants/permissions";
 import { deleteTeam, updateTeam } from "../../api/teams";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 
 const TeamDetailsPage = () => {
   const { id } = useParams();
@@ -80,7 +81,8 @@ const TeamDetailsPage = () => {
         tone: "success",
         title: "Team saved",
       });
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) return;
       enqueueSnackbar("The team could not be saved.", {
         variant: "toast",
         tone: "error",
@@ -101,13 +103,14 @@ const TeamDetailsPage = () => {
         title: "Team deleted",
       });
       navigate("/teams", { replace: true });
-    } catch {
+    } catch (err) {
+      setDeleting(false);
+      if (isHandled(err)) return;
       enqueueSnackbar(`${team.name} could not be deleted.`, {
         variant: "toast",
         tone: "error",
         title: "Something went wrong",
       });
-      setDeleting(false);
     }
   };
 

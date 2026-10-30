@@ -11,3 +11,5 @@ export const getFieldErrors = (error) => {
 
   return result;
 };
+
+export const isHandled = (error) => Boolean(error?.handled);

@@ -12,6 +12,7 @@ import { useCurrentUser } from "../../context/CurrentUserContext";
 import { updateUser, createUser, setUserPassword } from "../../api/user";
 import { getRoles } from "../../api/roles";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 
 const ROLE_ORDER = ["Admin", "User", "ReadOnlyUser"];
 const byRoleOrder = (a, b) =>
@@ -51,13 +52,14 @@ const UsersPage = () => {
         isActive: nowActive,
         rowVersion: user.rowVersion,
       });
-    } catch {
+    } catch (err) {
+      setBusyId(null);
+      if (isHandled(err)) return;
       enqueueSnackbar(`${user.name} could not be updated.`, {
         variant: "toast",
         tone: "error",
         title: "Something went wrong",
       });
-      setBusyId(null);
       return;
     }
 
@@ -94,7 +96,11 @@ const UsersPage = () => {
     setCreating(true);
     try {
       await createUser(data);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setNewOpen(false);
+        return;
+      }
       enqueueSnackbar("The user could not be created.", {
         variant: "toast",
         tone: "error",
@@ -117,7 +123,11 @@ const UsersPage = () => {
     setSavingPassword(true);
     try {
       await setUserPassword(passwordUser.id, password);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setPasswordUser(null);
+        return;
+      }
       enqueueSnackbar(
         `The password for ${passwordUser.name} could not be set.`,
         {

@@ -18,6 +18,7 @@ import { updateRole } from "../../api/roles";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { useBreadcrumbs } from "../../context/BreadcrumbContext";
 import { PERMISSION_CATALOG } from "../../constants/permissionCatalog";
+import { isHandled } from "../../utils/apiErrors";
 
 const LEFT = ["General", "Projects", "Management"];
 const RIGHT = ["Teams", "Tasks"];
@@ -89,9 +90,10 @@ const RoleDetailsPage = () => {
 
     try {
       await updateRole(role.id, { packages: nextPackages, claims: nextClaims });
-    } catch {
+    } catch (err) {
       setPackages(prevPackages);
       setClaims(prevClaims);
+      if (isHandled(err)) return;
       enqueueSnackbar(`${role.name} could not be updated.`, {
         variant: "toast",
         tone: "error",

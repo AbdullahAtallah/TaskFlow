@@ -16,6 +16,7 @@ import { useSnackbar } from "notistack";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import afterWrite from "../../utils/afterWrite";
+import { isHandled } from "../../utils/apiErrors";
 
 const TeamsPage = () => {
   const navigate = useNavigate();
@@ -61,7 +62,11 @@ const TeamsPage = () => {
         title: "Team created",
       });
       setNewTeamOpen(false);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setNewTeamOpen(false);
+        return;
+      }
       enqueueSnackbar("The team could not be created.", {
         variant: "toast",
         tone: "error",
@@ -84,7 +89,11 @@ const TeamsPage = () => {
     setDeleting(true);
     try {
       await deleteTeam(toDelete.id);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setToDelete(null);
+        return;
+      }
       enqueueSnackbar(`${toDelete.name} could not be deleted.`, {
         variant: "toast",
         tone: "error",

@@ -9,6 +9,7 @@ import ErrorState from "../../molecules/ErrorState/ErrorState";
 import useTeamMembers from "../../../hooks/useTeamMembers";
 import { addTeamMembers, removeTeamMember } from "../../../api/teams";
 import afterWrite from "../../../utils/afterWrite";
+import { isHandled } from "../../../utils/apiErrors";
 
 const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
   const { members, loading, error, reload } = useTeamMembers(teamId);
@@ -33,7 +34,11 @@ const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
         { variant: "toast", tone: "success", title: "Members added" },
       );
       setDialogOpen(false);
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) {
+        setDialogOpen(false);
+        return;
+      }
       enqueueSnackbar("The members could not be added.", {
         variant: "toast",
         tone: "error",
@@ -57,7 +62,8 @@ const TeamMembersTab = ({ teamId, teamName, canManage, onChanged }) => {
         tone: "success",
         title: "Member removed",
       });
-    } catch {
+    } catch (err) {
+      if (isHandled(err)) return;
       enqueueSnackbar(`${member.displayName} could not be removed.`, {
         variant: "toast",
         tone: "error",
