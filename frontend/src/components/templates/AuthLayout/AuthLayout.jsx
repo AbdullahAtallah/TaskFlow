@@ -34,7 +34,7 @@ const AuthLayout = ({ children }) => {
           gap: "24px",
         }}
       >
-        <GlobalStyles styles={{ body: { margin: 0, overflow: "hidden" } }} />
+        <GlobalStyles styles={{ body: { margin: 0 } }} />
         {children}
       </Paper>
 
