@@ -32,7 +32,8 @@ const TeamLinkItem = ({ name, members, projects, to }) => {
         <Typography
           sx={{ fontSize: "13px", color: "#6b7280", lineHeight: "18px" }}
         >
-          {members} members · {projects} projects
+          {members} {members === 1 ? "member" : "members"} · {projects}{" "}
+          {projects === 1 ? "project" : "projects"}
         </Typography>
       </Box>
       <ChevronRight size={16} color="#6b7280" />
